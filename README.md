@@ -55,8 +55,8 @@ GitHub Copilot and VS Code are not first-class Forge product hosts.
 ### Codex
 
 ```text
-codex plugin marketplace add .agents/plugins/marketplace.json
-codex plugin install forge
+codex plugin marketplace add y8gao/forge --ref main
+codex plugin add forge@forge
 ```
 
 ### Cursor

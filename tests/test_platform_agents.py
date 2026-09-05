@@ -34,6 +34,17 @@ def frontmatter(path: Path) -> tuple[dict[str, object], str]:
 
 
 class PlatformAgentPackagingTests(unittest.TestCase):
+    def test_readme_codex_install_uses_public_git_marketplace(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        codex = readme.split("### Codex\n", 1)[1].split("\n### Cursor", 1)[0]
+        self.assertIn(
+            "codex plugin marketplace add y8gao/forge --ref main",
+            codex,
+        )
+        self.assertIn("codex plugin add forge@forge", codex)
+        self.assertNotIn(".agents/plugins/marketplace.json", codex)
+        self.assertNotIn("codex plugin install", codex)
+
     def test_readme_leads_with_distinctive_value_and_minimum_workflow(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         introduction = readme.split("## First-class hosts\n", 1)[0]

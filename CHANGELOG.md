@@ -4,6 +4,9 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- Corrected the Codex installation instructions for the public Git marketplace.
+
 ## [0.1.0] - 2026-09-05
 
 ### Added
