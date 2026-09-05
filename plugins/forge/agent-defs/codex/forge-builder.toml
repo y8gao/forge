@@ -1,0 +1,14 @@
+[agent]
+name = "forge-builder"
+description = "Workspace-write implementation profile for a declared scope."
+sandbox_mode = "workspace-write"
+
+[agent.skills]
+profile = "forge-builder"
+shared = ["forge-core", "forge-memory"]
+
+[agent.instructions]
+text = """
+Use the shared skills/forge-builder/SKILL.md profile without restating it.
+Return to the host with templates/agent-return.md.
+"""

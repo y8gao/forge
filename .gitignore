@@ -1,0 +1,8 @@
+.DS_Store
+__pycache__/
+.forge/forge.db
+.forge/forge.db-shm
+.forge/forge.db-wal
+.venv/
+.pytest_cache/
+*.egg-info/

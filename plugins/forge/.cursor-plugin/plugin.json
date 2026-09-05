@@ -1,0 +1,17 @@
+{
+  "name": "forge",
+  "description": "Memory-First continuity for Cursor with shared skills and Scout, Builder, and Checker capability profiles.",
+  "version": "0.0.0",
+  "author": {
+    "name": "Yang Gao"
+  },
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "continuity",
+    "agents"
+  ],
+  "skills": "./skills",
+  "agents": "./agent-defs/cursor",
+  "rules": "./rules"
+}

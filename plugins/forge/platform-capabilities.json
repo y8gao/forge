@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "shared_profiles": [
+    "forge-scout",
+    "forge-builder",
+    "forge-checker"
+  ],
+  "host_adapters": [
+    {
+      "id": "claude-code",
+      "status": "active-native"
+    },
+    {
+      "id": "codex",
+      "status": "active-native"
+    },
+    {
+      "id": "cursor",
+      "status": "active-native"
+    }
+  ],
+  "platforms": [
+    {
+      "id": "claude-code",
+      "delivery": "native",
+      "manifest": "plugins/forge/.claude-plugin/plugin.json",
+      "agents": "plugins/forge/agents",
+      "profiles": [
+        "forge-scout",
+        "forge-builder",
+        "forge-checker"
+      ]
+    },
+    {
+      "id": "codex",
+      "delivery": "native",
+      "manifest": "plugins/forge/.codex-plugin/plugin.json",
+      "agents": "plugins/forge/agent-defs/codex",
+      "profiles": [
+        "forge-scout",
+        "forge-builder",
+        "forge-checker"
+      ]
+    },
+    {
+      "id": "cursor",
+      "delivery": "native",
+      "manifest": "plugins/forge/.cursor-plugin/plugin.json",
+      "agents": "plugins/forge/agent-defs/cursor",
+      "profiles": [
+        "forge-scout",
+        "forge-builder",
+        "forge-checker"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "forge",
+  "owner": {
+    "name": "Yang Gao"
+  },
+  "description": "Forge Memory-First continuity package for Claude Code.",
+  "plugins": [
+    {
+      "name": "forge",
+      "source": "./plugins/forge",
+      "description": "Active INTENT/MISSION memory with direct Core work and three temporary capability profiles."
+    }
+  ]
+}

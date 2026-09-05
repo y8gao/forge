@@ -1,0 +1,22 @@
+{
+  "name": "forge",
+  "description": "Forge Memory-First continuity package for Codex.",
+  "interface": {
+    "displayName": "Forge Skill Pack"
+  },
+  "plugins": [
+    {
+      "name": "forge",
+      "description": "Active INTENT/MISSION memory with direct Core work and three temporary capability profiles.",
+      "source": {
+        "source": "local",
+        "path": "./plugins/forge"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

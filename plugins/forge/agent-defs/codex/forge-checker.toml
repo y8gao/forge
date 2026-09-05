@@ -1,0 +1,14 @@
+[agent]
+name = "forge-checker"
+description = "Read-only checking profile for explicit claims and evidence."
+sandbox_mode = "read-only"
+
+[agent.skills]
+profile = "forge-checker"
+shared = ["forge-core", "forge-memory"]
+
+[agent.instructions]
+text = """
+Use the shared skills/forge-checker/SKILL.md profile without restating it.
+Return to the host with templates/agent-return.md.
+"""

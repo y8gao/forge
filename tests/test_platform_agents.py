@@ -1,0 +1,171 @@
+from __future__ import annotations
+
+import json
+import re
+import tomllib
+import unittest
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+PLUGIN = ROOT / "plugins" / "forge"
+PROFILES = ("forge-scout", "forge-builder", "forge-checker")
+
+
+def frontmatter(path: Path) -> tuple[dict[str, object], str]:
+    text = path.read_text(encoding="utf-8")
+    match = re.match(r"\A---\n(.*?)\n---\n(.*)\Z", text, re.DOTALL)
+    if not match:
+        raise AssertionError(f"missing frontmatter: {path}")
+    values: dict[str, object] = {}
+    for line in match.group(1).splitlines():
+        key, raw = line.split(":", 1)
+        raw = raw.strip()
+        if raw.startswith("["):
+            values[key] = [
+                value.strip()
+                for value in raw.removeprefix("[").removesuffix("]").split(",")
+            ]
+        elif raw in {"true", "false"}:
+            values[key] = raw == "true"
+        else:
+            values[key] = raw.strip('"')
+    return values, match.group(2)
+
+
+class PlatformAgentPackagingTests(unittest.TestCase):
+    def test_readme_leads_with_distinctive_value_and_minimum_workflow(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        introduction = readme.split("## First-class hosts\n", 1)[0]
+        for phrase in (
+            "Keep coding agents aligned across sessions",
+            "two small, human-reviewable Markdown files",
+            "## Why Forge",
+            "Resume from intent, not chat history",
+            "Direct by default",
+            "Extra control only when asked",
+            "Focused capabilities, not a simulated team",
+            "Native across three hosts",
+            "No runtime to operate",
+            "## How it works",
+            "Only the host agent writes active control memory",
+            "specific authorization",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, introduction)
+        self.assertLessEqual(len(introduction.splitlines()), 40)
+
+    def test_readme_use_is_scenario_first_and_honest_across_hosts(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        use = readme.split("## Use\n", 1)[1].split("\n## Validate", 1)[0]
+        for phrase in (
+            "Claude Code, Codex, or Cursor",
+            "ordinary work",
+            "at most 3 iterations",
+            "independent report-only",
+            "authorized bounded repair",
+            "fresh independent check",
+            "pause",
+            "resume",
+            "specific external action and target",
+            "Aliases are optional",
+            "does not claim live",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, use)
+        self.assertNotIn("Run `forge-init`", use)
+        self.assertNotIn("Invoke `forge-loop`", use)
+        for internal_term in ("Core", "Assurance", "Checker", "checkpoint", "active mission"):
+            self.assertNotIn(internal_term, use)
+
+    def test_wrapper_inventory_is_exact(self) -> None:
+        expected = {f"{name}.md" for name in PROFILES}
+        self.assertEqual(expected, {path.name for path in (PLUGIN / "agents").glob("*.md")})
+        self.assertEqual(
+            {f"{name}.toml" for name in PROFILES},
+            {path.name for path in (PLUGIN / "agent-defs/codex").glob("*.toml")},
+        )
+        self.assertEqual(
+            expected,
+            {path.name for path in (PLUGIN / "agent-defs/cursor").glob("*.md")},
+        )
+
+    def test_claude_wrappers_are_thin_and_reference_shared_contracts(self) -> None:
+        for name in PROFILES:
+            with self.subTest(profile=name):
+                metadata, body = frontmatter(PLUGIN / "agents" / f"{name}.md")
+                self.assertEqual(name, metadata["name"])
+                self.assertIn("description", metadata)
+                self.assertIn("tools", metadata)
+                self.assertEqual(
+                    [name, "forge-core", "forge-memory"],
+                    metadata["skills"],
+                )
+                if name in {"forge-scout", "forge-checker"}:
+                    self.assertNotIn("Write", metadata["tools"])
+                    self.assertNotIn("Edit", metadata["tools"])
+                if name == "forge-scout":
+                    self.assertNotIn("Bash", metadata["tools"])
+                elif name == "forge-checker":
+                    self.assertIn("Bash", metadata["tools"])
+                else:
+                    self.assertIn("Write", metadata["tools"])
+                    self.assertIn("Edit", metadata["tools"])
+                self.assertGreaterEqual(len(body.splitlines()), 5)
+                self.assertLessEqual(len(body.splitlines()), 15)
+                self.assertIn(f"skills/{name}/SKILL.md", body)
+                self.assertIn("templates/agent-return.md", body)
+                self.assertLess(len(body), 800)
+
+    def test_codex_permissions_and_shared_skill_refs_are_exact(self) -> None:
+        expected_modes = {
+            "forge-scout": "read-only",
+            "forge-builder": "workspace-write",
+            "forge-checker": "read-only",
+        }
+        for name, mode in expected_modes.items():
+            with self.subTest(profile=name):
+                data = tomllib.loads(
+                    (PLUGIN / "agent-defs/codex" / f"{name}.toml").read_text(
+                        encoding="utf-8"
+                    )
+                )
+                self.assertEqual(name, data["agent"]["name"])
+                self.assertEqual(mode, data["agent"]["sandbox_mode"])
+                self.assertEqual(name, data["agent"]["skills"]["profile"])
+                self.assertEqual(
+                    ["forge-core", "forge-memory"],
+                    data["agent"]["skills"]["shared"],
+                )
+                instructions = data["agent"]["instructions"]["text"]
+                self.assertIn(f"skills/{name}/SKILL.md", instructions)
+                self.assertIn("templates/agent-return.md", instructions)
+                self.assertLess(len(instructions.splitlines()), 10)
+
+    def test_platform_capabilities_claim_exact_native_hosts(self) -> None:
+        data = json.loads(
+            (PLUGIN / "platform-capabilities.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(list(PROFILES), data["shared_profiles"])
+        self.assertEqual(
+            [
+                {"id": "claude-code", "status": "active-native"},
+                {"id": "codex", "status": "active-native"},
+                {"id": "cursor", "status": "active-native"},
+            ],
+            data["host_adapters"],
+        )
+        self.assertEqual(
+            {"claude-code", "codex", "cursor"},
+            {platform["id"] for platform in data["platforms"]},
+        )
+        for platform in data["platforms"]:
+            self.assertEqual("native", platform["delivery"])
+            self.assertEqual(list(PROFILES), platform["profiles"])
+        serialized = json.dumps(data).lower()
+        self.assertNotIn("copilot", serialized)
+        self.assertNotIn("vscode", serialized)
+
+
+if __name__ == "__main__":
+    unittest.main()

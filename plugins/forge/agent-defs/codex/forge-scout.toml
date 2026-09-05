@@ -1,0 +1,14 @@
+[agent]
+name = "forge-scout"
+description = "Read-only discovery profile for focused investigation."
+sandbox_mode = "read-only"
+
+[agent.skills]
+profile = "forge-scout"
+shared = ["forge-core", "forge-memory"]
+
+[agent.instructions]
+text = """
+Use the shared skills/forge-scout/SKILL.md profile without restating it.
+Return to the host with templates/agent-return.md.
+"""

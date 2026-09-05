@@ -1,0 +1,9 @@
+---
+description: Orient Cursor to Forge active memory.
+alwaysApply: true
+---
+When `.forge/INTENT.md` and `.forge/MISSION.md` exist, read them before work.
+Treat those two files as canonical active control memory.
+Follow `skills/forge-core/SKILL.md` for shared Memory-First behavior.
+Use packaged commands and capability profiles only when the task calls for them.
+Do not restate shared Core, Loop, Assurance, or profile semantics here.

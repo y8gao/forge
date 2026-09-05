@@ -1,0 +1,28 @@
+This repository dogfoods Forge Memory-First.
+
+At the start of work, read only active `.forge/INTENT.md` and
+`.forge/MISSION.md`; run `forge-init` if either is missing. Archives, reviews,
+and `forge.db` are opt-in history, not default orientation.
+
+The host executes ordinary tasks directly. Do not automatically delegate,
+create review artifacts, run a fixed role/preflight/gate pipeline, or enter
+Assurance. Clarify consequential ambiguity; small reversible assumptions may
+be made and reported.
+
+Use targeted checks proportional to the change and report exact evidence plus
+unchecked boundaries. Only the host writes active control memory.
+Use the five checkpoint transitions: user decision, visible delivery, pause,
+completion, and mission replacement. Do not checkpoint every step.
+
+Loop and Assurance start only when the user explicitly invokes or requests
+them. Task-based capability profiles, when available, are selected by task and
+are never a required pipeline.
+
+## 证据纪律
+Verification levels: unverified → smoke_verified → locally_verified → reviewed → ci_verified
+ci_verified 需要真实 CI 证据；本地测试只到 locally_verified。
+
+## Git 与产品边界
+- 未经用户针对本次改动明确要求，不执行 commit 或 push。
+- 至少支持 Claude Code + Codex；`SKILL.md` < 500 行；模板保留 frontmatter。
+- 不构建 runtime hooks、block graph、确定性传播引擎、多用户同步或 CI 自动部署。

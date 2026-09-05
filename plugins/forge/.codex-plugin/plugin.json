@@ -1,0 +1,22 @@
+{
+  "name": "forge",
+  "version": "0.0.0",
+  "description": "Memory-First continuity for Codex with shared skills and Scout, Builder, and Checker capability profiles.",
+  "author": {
+    "name": "Forge"
+  },
+  "interface": {
+    "displayName": "Forge",
+    "shortDescription": "Memory-First continuity with three task profiles",
+    "longDescription": "Forge keeps Codex oriented with active INTENT/MISSION memory, direct Core execution, optional bounded Loop and Assurance, and three temporary capability profiles.",
+    "developerName": "Forge",
+    "category": "Productivity",
+    "capabilities": [
+      "skills",
+      "agents"
+    ],
+    "defaultPrompt": "Use Forge Memory-First Core for this task."
+  },
+  "skills": "./skills",
+  "agents": "./agent-defs/codex"
+}

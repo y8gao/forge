@@ -1,0 +1,4 @@
+interface:
+  display_name: "Forge Core"
+  short_description: "Thin protocol and delivery discipline core"
+  default_prompt: "Use $forge-core to run the thin protocol for this task."
