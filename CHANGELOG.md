@@ -10,6 +10,8 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 - Corrected the Codex installation instructions for the public Git marketplace.
+- Forced the cross-platform CI suite to use Git Bash so Windows runners do not
+  invoke the WSL launcher.
 
 ## [0.1.0] - 2026-09-05
 

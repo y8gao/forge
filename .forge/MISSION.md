@@ -1,41 +1,39 @@
 ---
 format: "forge-memory-v1"
-mission_id: "ci-automation"
-state: "done"
-checkpointed_at: "2026-09-05T08:32:41Z"
+mission_id: "ci-windows-bash-fix"
+state: "working"
+checkpointed_at: "2026-09-05T10:24:28Z"
 ---
 # Current Mission
 
 ## Outcome
-- Statement: Add two-tier GitHub Actions automation that continuously validates Forge and exercises supported host installation paths honestly.
+- Statement: Make the release workflow tests use Git for Windows Bash in the GitHub Actions Windows matrix instead of the WSL launcher.
 
 ## Scope
-- In: Synchronize core CI and host compatibility workflows across private source and public repositories; add fixed-version Claude/Codex install gates, latest-version monitoring, Cursor static contract checks, documentation, and regression coverage.
-- Out: Commit, push, branch-protection changes, CI deployment, global marketplace submission, or unsupported claims of headless Cursor installation.
-- Constraints: Use least-privilege Actions pinned by immutable SHA; isolate host configuration; require no API keys; keep fixed PR gates separate from latest compatibility monitoring.
+- In: Add a regression contract, update the Core CI full-suite shell, synchronize both repositories, verify, commit, push, and inspect the resulting CI run.
+- Out: Change release semantics, install WSL, weaken the Windows matrix, or modify host compatibility jobs.
+- Constraints: Keep the fix workflow-local and minimal; preserve the existing cross-platform test matrix and least-privilege boundary.
 
 ## Success Criteria
-- [x] Core CI runs validation and the full suite on Ubuntu and Windows for supported Python versions.
-- [x] Pull requests use fixed Claude Code and Codex CLI versions for isolated local marketplace installation smoke tests.
-- [x] A scheduled/manual workflow exercises latest Claude Code and Codex compatibility and the public marketplace path.
-- [x] Cursor coverage stays explicit and static until a supported headless installer exists.
-- [x] Workflows use least privilege, immutable Action revisions, concurrency cancellation, and bounded timeouts.
-- [x] README, CHANGELOG, and regression tests document and enforce the two-tier boundary.
-- [x] Both repositories pass proportional local verification with synchronized CI product files.
+- [x] A regression test requires the full-suite CI step to run with Git Bash.
+- [ ] Windows Python 3.11 and 3.14 no longer resolve `bash` to the WSL launcher.
+- [x] Both repositories retain synchronized workflows and regression tests.
+- [ ] Local checks pass and the fix is committed and pushed to both `main` branches.
+- [ ] The resulting public Core CI run is inspected and its exact status reported.
 
 ## Latest Delivery
-- Added synchronized two-tier GitHub Actions, pinned Claude Code and Codex PR installation gates, latest compatibility monitoring, Cursor static boundaries, documentation, and regression contracts.
+- Added synchronized regression coverage and configured the Core CI full-suite step to run under Git for Windows Bash.
 
 ## Next Action
-- After explicit commit and push authorization, publish both workflow sets, observe real GitHub Actions results, and configure required checks.
+- Commit and push the fix to both repositories, then inspect the resulting Windows Python 3.11 and 3.14 CI jobs.
 
 ## Blockers
 - None.
 
 ## Last Check
-- Ran: Both repositories: full 277-test suite PASS with 1 Windows POSIX-mode skip; 14 targeted tests PASS; content and memory validation PASS; bash syntax, git diff check, actionlint v1.7.12, and synchronized-file comparison PASS.
-- Boundary: Locally verified only; no real GitHub Actions run, live host CLI installation, commit, push, or branch-protection change was performed.
+- Ran: Both repositories: actionlint v1.7.12 PASS; content and memory validation PASS; explicit Git Bash full suite 277 PASS with 1 Windows POSIX-mode skip; git diff check PASS.
+- Boundary: Locally verified with the same Git Bash executable class used by GitHub Actions; hosted Windows CI confirmation is pending publication.
 
 ## Resume
 - Read: `.forge/INTENT.md` and `.forge/MISSION.md` only.
-- Do: After explicit commit and push authorization, publish both workflow sets, observe real GitHub Actions results, and configure required checks.
+- Do: Commit and push the fix to both repositories, then inspect the resulting Windows Python 3.11 and 3.14 CI jobs.
