@@ -1,8 +1,8 @@
 ---
 format: "forge-memory-v1"
 mission_id: "release-0.1.0"
-state: "working"
-checkpointed_at: "2026-09-05T07:20:00Z"
+state: "done"
+checkpointed_at: "2026-09-05T07:30:07Z"
 ---
 # Current Mission
 
@@ -23,23 +23,23 @@ checkpointed_at: "2026-09-05T07:20:00Z"
 - [x] A current-product snapshot passes secret and historical-surface audits without any source `.git` history.
 - [x] The old private `y8gao/forge` is renamed and archived without publishing its runtime history.
 - [x] Public `y8gao/forge` starts from the audited snapshot as one clean initial commit.
-- [ ] `release.sh prepare 0.1.0` passes and changes only the four version allowlist files.
-- [ ] The prepared diff and sealed release receipt are reviewed.
-- [ ] The authorized release commit, `v0.1.0` tag, push, and public GitHub Release complete successfully.
+- [x] `release.sh prepare 0.1.0` passes and changes only the four version allowlist files.
+- [x] The prepared diff and sealed release receipt are reviewed.
+- [x] The authorized release commit, `v0.1.0` tag, push, and public GitHub Release complete successfully.
 
 ## Latest Delivery
-- Preserved the verified private source, audited a history-free snapshot, and archived the old private runtime repository as `forge-runtime-archive`; this snapshot is ready for one clean public initial commit.
+- Published Forge Memory-First 0.1.0 from a clean public repository with no private exploration Git history; archived the old runtime repository and preserved private source history separately.
 
 ## Next Action
-- Create public `y8gao/forge` from this initial commit, then run `release.sh prepare 0.1.0`.
+- Collect first-release feedback and open a new Mission for any follow-up product change.
 
 ## Blockers
 - None.
 
 ## Last Check
-- Ran: Full source suite 273 PASS with 1 Windows POSIX-mode skip; snapshot content and Memory validation PASS; secret/history signature scans found no matches; old runtime repo is private and archived.
-- Boundary: Local pattern scan used because gitleaks/trufflehog are unavailable; public repository, prepare receipt, release tag, and Release do not exist yet.
+- Ran: Full source suite 273 PASS with 1 Windows POSIX-mode skip; fresh installed v1 smoke PASS; release prepare and commit gates each passed 97 packaging/content tests plus 17 release workflow tests; sealed receipt valid; public main and v0.1.0 pushed; GitHub Release created.
+- Boundary: Locally verified and publicly published; Claude and Codex CLIs were unavailable for live native-host validation, and no CI workflow or global host marketplace submission was run.
 
 ## Resume
 - Read: `.forge/INTENT.md` and `.forge/MISSION.md` only.
-- Do: Create public `y8gao/forge` from this initial commit, then run `release.sh prepare 0.1.0`.
+- Do: Collect first-release feedback and open a new Mission for any follow-up product change.
