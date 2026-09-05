@@ -78,7 +78,20 @@ class ReleaseStaticTests(unittest.TestCase):
         self.assertNotIn("host_manifests", module["CANONICAL_VALIDATION"])
         self.assertNotIn("installer", module["CANONICAL_VALIDATION"])
 
+    def test_release_workflow_execution_is_posix_only(self) -> None:
+        skipped = bool(getattr(ReleaseWorkflowTests, "__unittest_skip__", False))
+        self.assertEqual(os.name == "nt", skipped)
+        if skipped:
+            self.assertEqual(
+                "release.sh execution is covered by the Linux CI matrix",
+                ReleaseWorkflowTests.__unittest_skip_why__,
+            )
 
+
+@unittest.skipIf(
+    os.name == "nt",
+    "release.sh execution is covered by the Linux CI matrix",
+)
 class ReleaseWorkflowTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()

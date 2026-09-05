@@ -10,8 +10,8 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 - Corrected the Codex installation instructions for the public Git marketplace.
-- Forced the cross-platform CI suite to use Git Bash so Windows runners do not
-  invoke the WSL launcher.
+- Limited executable `release.sh` workflow tests to the Linux CI matrix while
+  retaining Windows coverage for the cross-platform Python product surface.
 
 ## [0.1.0] - 2026-09-05
 

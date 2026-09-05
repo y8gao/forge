@@ -66,12 +66,6 @@ class PlatformAgentPackagingTests(unittest.TestCase):
                 self.assertIn(phrase, workflow)
         self.assertNotIn("@latest", workflow)
         self.assertNotRegex(workflow, r"actions/(?:checkout|setup-python|setup-node)@v\d")
-        self.assertIn(
-            "      - name: Run full test suite\n"
-            "        shell: bash\n"
-            "        run: python -m unittest discover -s tests -p 'test_*.py'",
-            workflow,
-        )
 
     def test_latest_host_compatibility_is_scheduled_and_public_aware(self) -> None:
         path = ROOT / ".github/workflows/host-compatibility.yml"
