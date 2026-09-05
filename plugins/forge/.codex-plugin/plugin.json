@@ -1,6 +1,6 @@
 {
   "name": "forge",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Memory-First continuity for Codex with shared skills and Scout, Builder, and Checker capability profiles.",
   "author": {
     "name": "Forge"
