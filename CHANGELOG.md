@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Added cross-platform core CI, pinned Claude Code and Codex installation gates,
+  and scheduled latest-host compatibility monitoring.
+
 ### Fixed
 - Corrected the Codex installation instructions for the public Git marketplace.
 

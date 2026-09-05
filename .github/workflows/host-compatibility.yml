@@ -1,0 +1,98 @@
+name: Host Compatibility
+
+on:
+  schedule:
+    - cron: "17 5 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  claude-local:
+    name: Claude Code latest / local checkout
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Install latest Claude Code CLI
+        run: npm install --global @anthropic-ai/claude-code@latest
+      - name: Validate and install local plugin
+        env:
+          HOME: ${{ runner.temp }}/claude-local-home
+        run: |
+          mkdir -p "$HOME"
+          claude plugin validate .
+          claude plugin validate ./plugins/forge
+          claude plugin marketplace add "$GITHUB_WORKSPACE"
+          claude plugin install forge@forge --scope user
+
+  codex-local:
+    name: Codex latest / local checkout
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Install latest Codex CLI
+        run: npm install --global @openai/codex@latest
+      - name: Install local plugin
+        env:
+          CODEX_HOME: ${{ runner.temp }}/codex-local-home
+        run: |
+          mkdir -p "$CODEX_HOME"
+          codex plugin marketplace add "$GITHUB_WORKSPACE" --json
+          codex plugin add forge@forge --json
+
+  claude-public:
+    name: Claude Code latest / public marketplace
+    if: github.repository == 'y8gao/forge'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Install latest Claude Code CLI
+        run: npm install --global @anthropic-ai/claude-code@latest
+      - name: Install from public marketplace
+        env:
+          HOME: ${{ runner.temp }}/claude-public-home
+        run: |
+          mkdir -p "$HOME"
+          claude plugin marketplace add y8gao/forge@main
+          claude plugin install forge@forge --scope user
+
+  codex-public:
+    name: Codex latest / public marketplace
+    if: github.repository == 'y8gao/forge'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Install latest Codex CLI
+        run: npm install --global @openai/codex@latest
+      - name: Install from public marketplace
+        env:
+          CODEX_HOME: ${{ runner.temp }}/codex-public-home
+        run: |
+          mkdir -p "$CODEX_HOME"
+          codex plugin marketplace add y8gao/forge --ref main --json
+          codex plugin add forge@forge --json

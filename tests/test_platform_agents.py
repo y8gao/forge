@@ -34,6 +34,81 @@ def frontmatter(path: Path) -> tuple[dict[str, object], str]:
 
 
 class PlatformAgentPackagingTests(unittest.TestCase):
+    def test_core_ci_is_cross_platform_least_privilege_and_pinned(self) -> None:
+        path = ROOT / ".github/workflows/ci.yml"
+        self.assertTrue(path.is_file(), "core CI workflow is missing")
+        workflow = path.read_text(encoding="utf-8")
+        for phrase in (
+            "name: Core CI",
+            "pull_request:",
+            "push:",
+            "workflow_dispatch:",
+            "permissions:\n  contents: read",
+            "cancel-in-progress: true",
+            "timeout-minutes:",
+            "os: [ubuntu-latest, windows-latest]",
+            'python: ["3.11", "3.14"]',
+            "python scripts/validate-content.py",
+            "python plugins/forge/scripts/forge-memory-validate .",
+            "python -m unittest discover -s tests -p 'test_*.py'",
+            "git diff --check",
+            "bash -n scripts/release.sh",
+            'CLAUDE_CODE_VERSION: "2.1.261"',
+            'CODEX_VERSION: "0.153.4"',
+            'claude plugin marketplace add "$GITHUB_WORKSPACE"',
+            "claude plugin install forge@forge --scope user",
+            'codex plugin marketplace add "$GITHUB_WORKSPACE" --json',
+            "codex plugin add forge@forge --json",
+            "HOME: ${{ runner.temp }}/claude-home",
+            "CODEX_HOME: ${{ runner.temp }}/codex-home",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, workflow)
+        self.assertNotIn("@latest", workflow)
+        self.assertNotRegex(workflow, r"actions/(?:checkout|setup-python|setup-node)@v\d")
+
+    def test_latest_host_compatibility_is_scheduled_and_public_aware(self) -> None:
+        path = ROOT / ".github/workflows/host-compatibility.yml"
+        self.assertTrue(path.is_file(), "host compatibility workflow is missing")
+        workflow = path.read_text(encoding="utf-8")
+        for phrase in (
+            "name: Host Compatibility",
+            "schedule:",
+            "cron:",
+            "workflow_dispatch:",
+            "permissions:\n  contents: read",
+            "cancel-in-progress: true",
+            "timeout-minutes:",
+            "@anthropic-ai/claude-code@latest",
+            "@openai/codex@latest",
+            'claude plugin marketplace add "$GITHUB_WORKSPACE"',
+            'codex plugin marketplace add "$GITHUB_WORKSPACE" --json',
+            "github.repository == 'y8gao/forge'",
+            "claude plugin marketplace add y8gao/forge",
+            "codex plugin marketplace add y8gao/forge --ref main --json",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, workflow)
+        self.assertNotIn("ANTHROPIC_API_KEY", workflow)
+        self.assertNotIn("OPENAI_API_KEY", workflow)
+        self.assertNotRegex(workflow, r"actions/(?:checkout|setup-node)@v\d")
+
+    def test_readme_documents_ci_host_coverage_boundary(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        validation = readme.split("## Validate\n", 1)[1].split(
+            "\n## Versioning", 1
+        )[0]
+        for phrase in (
+            "fixed CLI versions",
+            "latest",
+            "Claude Code",
+            "Codex",
+            "Cursor",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, validation)
+        self.assertRegex(validation, r"headless\s+installer")
+
     def test_readme_codex_install_uses_public_git_marketplace(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         codex = readme.split("### Codex\n", 1)[1].split("\n### Cursor", 1)[0]

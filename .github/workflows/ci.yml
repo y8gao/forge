@@ -1,0 +1,100 @@
+name: Core CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Python ${{ matrix.python }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.14"]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Validate product content
+        run: python scripts/validate-content.py
+      - name: Validate active memory
+        run: python plugins/forge/scripts/forge-memory-validate .
+      - name: Run full test suite
+        run: python -m unittest discover -s tests -p 'test_*.py'
+      - name: Check whitespace
+        run: git diff --check
+      - name: Check release script syntax
+        if: runner.os == 'Linux'
+        run: bash -n scripts/release.sh
+
+  claude-install:
+    name: Claude Code install / pinned
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLAUDE_CODE_VERSION: "2.1.261"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Install pinned Claude Code CLI
+        run: npm install --global "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+      - name: Validate and install local plugin
+        env:
+          HOME: ${{ runner.temp }}/claude-home
+        run: |
+          mkdir -p "$HOME"
+          claude plugin validate .
+          claude plugin validate ./plugins/forge
+          claude plugin marketplace add "$GITHUB_WORKSPACE"
+          claude plugin install forge@forge --scope user
+
+  codex-install:
+    name: Codex install / pinned
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CODEX_VERSION: "0.153.4"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Install pinned Codex CLI
+        run: npm install --global "@openai/codex@${CODEX_VERSION}"
+      - name: Install local plugin
+        env:
+          CODEX_HOME: ${{ runner.temp }}/codex-home
+        run: |
+          mkdir -p "$CODEX_HOME"
+          codex plugin marketplace add "$GITHUB_WORKSPACE" --json
+          codex plugin add forge@forge --json > "$RUNNER_TEMP/codex-install.json"
+          python - "$RUNNER_TEMP/codex-install.json" <<'PY'
+          import json
+          import sys
+
+          data = json.load(open(sys.argv[1], encoding="utf-8"))
+          assert data["name"] == "forge", data
+          assert data["marketplaceName"] == "forge", data
+          assert data["installedPath"], data
+          PY

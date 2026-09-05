@@ -1,5 +1,7 @@
 # Forge
 
+[![Core CI](https://github.com/y8gao/forge/actions/workflows/ci.yml/badge.svg)](https://github.com/y8gao/forge/actions/workflows/ci.yml)
+
 Keep coding agents aligned across sessions without adding another runtime.
 
 Forge saves active direction in two small, human-reviewable Markdown files:
@@ -101,6 +103,15 @@ python -m unittest tests.test_platform_agents tests.test_cursor_package \
 python scripts/validate-content.py
 git diff --check
 ```
+
+Core CI runs the full suite and validators on Ubuntu and Windows. Pull requests
+also install Forge through Claude Code and Codex using fixed CLI versions in
+isolated homes. A weekly Host Compatibility workflow repeats those checks with
+the latest CLIs and verifies the public marketplace path.
+
+Cursor manifests, component paths, and native agents are covered by blocking
+static contract tests. Cursor does not currently expose a supported headless
+installer, so CI does not claim a live Cursor installation test.
 
 ## Versioning
 
