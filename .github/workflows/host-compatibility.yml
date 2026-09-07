@@ -57,6 +57,69 @@ jobs:
           codex plugin marketplace add "$GITHUB_WORKSPACE" --json
           codex plugin add forge@forge --json
 
+  command-code-local:
+    name: Command Code latest / local skills
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Install latest Command Code CLI
+        run: npm install --global command-code@latest
+      - name: Discover local Agent Skills
+        env:
+          HOME: ${{ runner.temp }}/command-code-local-home
+        run: |
+          mkdir -p "$HOME"
+          command-code skills list
+
+  pi-local:
+    name: Pi latest / local package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.19.0"
+      - name: Install latest Pi CLI
+        run: npm install --global @earendil-works/pi-coding-agent@latest
+      - name: Install local package
+        env:
+          HOME: ${{ runner.temp }}/pi-local-home
+        run: |
+          mkdir -p "$HOME"
+          pi install "$GITHUB_WORKSPACE"
+          pi list
+
+  dsh-local:
+    name: DeepSeek Harness latest / local experimental bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.19.0"
+      - name: Install pinned pnpm
+        run: npm install --global pnpm@10.17.1
+      - name: Install latest DeepSeek Harness CLI
+        run: npm install --global @deepseek-ai/dsh@latest
+      - name: Install and compose local bundle
+        env:
+          DSH_HOME: ${{ runner.temp }}/dsh-local-home
+        run: |
+          dsh plugin --profile forge-smoke add "$GITHUB_WORKSPACE/packages/deepseek-harness"
+          dsh --profile forge-smoke --dump-config
+
   claude-public:
     name: Claude Code latest / public marketplace
     if: github.repository == 'y8gao/forge'
@@ -96,3 +159,46 @@ jobs:
           mkdir -p "$CODEX_HOME"
           codex plugin marketplace add y8gao/forge --ref main --json
           codex plugin add forge@forge --json
+
+  command-code-public:
+    name: Command Code latest / public skills
+    if: github.repository == 'y8gao/forge'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Install latest Command Code CLI
+        run: npm install --global command-code@latest
+      - name: Install all public Forge skills
+        env:
+          HOME: ${{ runner.temp }}/command-code-public-home
+        run: |
+          mkdir -p "$HOME"
+          for skill in forge-core forge-memory forge-init forge-status forge-loop forge-assurance forge-scout forge-builder forge-checker; do
+            command-code skills add y8gao/forge@main --skill "$skill" --global --force
+          done
+          command-code skills list
+
+  pi-public:
+    name: Pi latest / public Git package
+    if: github.repository == 'y8gao/forge'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.19.0"
+      - name: Install latest Pi CLI
+        run: npm install --global @earendil-works/pi-coding-agent@latest
+      - name: Install public Git package
+        env:
+          HOME: ${{ runner.temp }}/pi-public-home
+          GIT_TERMINAL_PROMPT: "0"
+        run: |
+          mkdir -p "$HOME"
+          pi install git:github.com/y8gao/forge@main
+          pi list

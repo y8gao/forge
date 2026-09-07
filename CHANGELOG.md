@@ -7,6 +7,10 @@ All notable changes to this project are documented in this file.
 ### Added
 - Added cross-platform core CI, pinned Claude Code and Codex installation gates,
   and scheduled latest-host compatibility monitoring.
+- Added Core-level Command Code and Pi delivery through standard Agent Skills,
+  plus a pinned experimental DeepSeek Harness bundle.
+- Added synchronized portable copies of all nine skills, package smoke checks,
+  and tier-aware capability metadata without claiming profile equivalence.
 
 ### Fixed
 - Corrected the Codex installation instructions for the public Git marketplace.

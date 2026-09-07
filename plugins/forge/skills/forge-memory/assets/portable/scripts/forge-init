@@ -1,0 +1,127 @@
+from __future__ import annotations
+
+from pathlib import Path
+import sys
+
+
+LIB = Path(__file__).resolve().parents[1] / "lib"
+sys.path.insert(0, str(LIB))
+
+from forge_files import atomic_write, validate_managed_path
+from forge_memory import (
+    load_intent,
+    load_mission,
+    render_initial_intent,
+    render_initial_mission,
+)
+
+
+BEGIN_MARKER = "<!-- BEGIN FORGE MEMORY-FIRST -->"
+END_MARKER = "<!-- END FORGE MEMORY-FIRST -->"
+BRIDGE = f"""\
+{BEGIN_MARKER}
+## Forge Memory-First
+When entering this project, read `.forge/INTENT.md` and `.forge/MISSION.md`.
+Work around the current outcome and next action.
+Update active memory only at checkpoint transitions.
+{END_MARKER}
+"""
+
+
+def _error(message: str, *, code: int = 2) -> int:
+    print(f"forge-init ERROR: {message}", file=sys.stderr)
+    return code
+
+
+def _validate_bridge(path: Path) -> bytes | None:
+    if not path.exists():
+        return None
+    content = path.read_bytes()
+    begin = BEGIN_MARKER.encode("utf-8")
+    end = END_MARKER.encode("utf-8")
+    begin_count = content.count(begin)
+    end_count = content.count(end)
+    if begin_count == 0 and end_count == 0:
+        return content
+    if begin_count == 1 and end_count == 1 and content.index(begin) < content.index(end):
+        return content
+    raise ValueError(f"malformed Forge Memory-First markers in {path}")
+
+
+def _append_bridge(project_root: Path, path: Path) -> None:
+    content = _validate_bridge(path)
+    if content is not None:
+        if BEGIN_MARKER.encode("utf-8") in content:
+            return
+        separator = b"\n\n" if content and not content.endswith(b"\n") else b"\n"
+        atomic_write(
+            project_root,
+            path,
+            content + separator + BRIDGE.encode("utf-8"),
+        )
+        return
+    atomic_write(project_root, path, BRIDGE.encode("utf-8"))
+
+
+def main(arguments: list[str]) -> int:
+    if len(arguments) != 1:
+        return _error("expected exactly one PROJECT_ROOT")
+
+    project_root = Path(arguments[0])
+    if project_root.name.lower() == ".forge":
+        return _error("PROJECT_ROOT must not be a .forge directory")
+    if not project_root.exists():
+        return _error(f"PROJECT_ROOT does not exist: {project_root}", code=1)
+    if not project_root.is_dir():
+        return _error(f"PROJECT_ROOT is not a directory: {project_root}", code=1)
+
+    try:
+        forge = project_root / ".forge"
+        intent = forge / "INTENT.md"
+        mission = forge / "MISSION.md"
+        archive = forge / "archive"
+        decisions = forge / "decisions"
+        agents = project_root / "AGENTS.md"
+        claude = project_root / "CLAUDE.md"
+        for path in (
+            project_root,
+            forge,
+            intent,
+            mission,
+            archive,
+            decisions,
+            agents,
+            claude,
+        ):
+            validate_managed_path(project_root, path)
+        _validate_bridge(agents)
+        _validate_bridge(claude)
+        if intent.exists():
+            load_intent(intent)
+        if mission.exists():
+            load_mission(mission)
+        forge.mkdir(exist_ok=True)
+        archive.mkdir(exist_ok=True)
+        if not intent.exists():
+            atomic_write(
+                project_root,
+                intent,
+                render_initial_intent().encode("utf-8"),
+            )
+        if not mission.exists():
+            atomic_write(
+                project_root,
+                mission,
+                render_initial_mission().encode("utf-8"),
+            )
+        _append_bridge(project_root, agents)
+        _append_bridge(project_root, claude)
+    except (OSError, UnicodeError, ValueError) as error:
+        return _error(str(error), code=1)
+
+    print(f"forge-init initialized {project_root}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

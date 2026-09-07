@@ -1,0 +1,67 @@
+from __future__ import annotations
+
+from pathlib import Path
+import sys
+
+
+LIB = Path(__file__).resolve().parents[1] / "lib"
+sys.path.insert(0, str(LIB))
+
+from forge_memory import MemoryValidationError, load_intent, load_mission
+
+
+def _error(message: str, *, code: int = 2) -> int:
+    print(f"forge-status ERROR: {message}", file=sys.stderr)
+    return code
+
+
+def main(arguments: list[str]) -> int:
+    if len(arguments) != 1:
+        return _error("expected exactly one PROJECT_ROOT")
+
+    project_root = Path(arguments[0])
+    if project_root.name.lower() == ".forge":
+        return _error("PROJECT_ROOT must not be a .forge directory")
+    if not project_root.is_dir():
+        return _error(f"PROJECT_ROOT is not a directory: {project_root}", code=1)
+    forge = project_root / ".forge"
+    if not forge.is_dir():
+        return _error(
+            f"no .forge directory; run forge-init PROJECT_ROOT ({project_root})",
+            code=1,
+        )
+
+    try:
+        load_intent(forge / "INTENT.md")
+        mission = load_mission(forge / "MISSION.md")
+    except MemoryValidationError as error:
+        return _error(str(error), code=1)
+
+    checkpoint = mission.checkpointed_at or "None recorded."
+    print(
+        "\n".join(
+            (
+                "# Forge Memory-First",
+                "",
+                "## Mission",
+                f"- **ID:** `{mission.mission_id}`",
+                f"- **State:** `{mission.state}`",
+                f"- **Outcome:** {mission.outcome}",
+                f"- **Checkpoint:** `{checkpoint}`",
+                "",
+                "## Progress",
+                f"- **Latest delivery:** {mission.latest_delivery}",
+                f"- **Next action:** {mission.next_action}",
+                f"- **Blockers:** {', '.join(mission.blockers)}",
+                "",
+                "## Verification",
+                f"- **Last check:** {mission.last_check_run}",
+                f"- **Boundary:** {mission.last_check_boundary}",
+            )
+        )
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

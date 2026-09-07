@@ -1,0 +1,4 @@
+interface:
+  display_name: "Forge Memory"
+  short_description: "INTENT/MISSION memory lifecycle rules"
+  default_prompt: "Use $forge-memory to maintain INTENT.md and MISSION.md."

@@ -1,40 +1,38 @@
 ---
 format: "forge-memory-v1"
-mission_id: "ci-release-platform-boundary"
+mission_id: "fix-new-host-ci"
 state: "done"
-checkpointed_at: "2026-09-05T10:38:42Z"
+checkpointed_at: "2026-09-07T02:16:36Z"
 ---
 # Current Mission
 
 ## Outcome
-- Statement: Run executable `release.sh` workflow tests on Linux while retaining Windows validation for the cross-platform Python product surface.
+- Statement: Fix the GitHub Actions failures introduced by the new coding-agent host support.
 
 ## Scope
-- In: Encode the POSIX-only release execution boundary, keep static release checks cross-platform, synchronize both repositories, verify, commit, push, and inspect CI.
-- Out: Change release semantics, install WSL, remove the Windows matrix, or modify host compatibility jobs.
-- Constraints: Keep Linux coverage for every release workflow case and Windows coverage for the remaining Python product surface.
+- In: Diagnose workflow validation and host installation failures, add regression coverage, fix workflows, verify locally, commit, push, and inspect resulting CI.
+- Out: Change host support tiers, publish npm packages, or add unrelated maintenance.
+- Constraints: Preserve least-privilege permissions, pinned PR gates, latest-version monitoring, and honest verification boundaries.
 
 ## Success Criteria
-- [x] A regression test encodes that executable `release.sh` workflow cases are POSIX-only.
-- [x] Linux continues to run every release workflow case through the full suite.
-- [x] Windows continues to validate static release contracts and the cross-platform Python product surface.
-- [x] Both repositories retain synchronized workflows and regression tests.
-- [x] Local checks pass and the fix is committed and pushed to both `main` branches.
-- [x] The resulting public Core CI run is inspected and its exact status reported.
+- [x] Both workflow files pass GitHub-aware semantic validation.
+- [x] Core CI creates jobs and all required checks pass.
+- [x] Host Compatibility creates the intended scheduled/manual jobs without running on ordinary pushes.
+- [x] The fix is covered by regression tests and pushed to the feature branch.
 
 ## Latest Delivery
-- Published the POSIX-only release execution boundary while preserving Windows product coverage; corrected Core CI passed in both repositories.
+- Repaired GitHub Actions workflow validation and DSH plugin setup; both Core CI and Host Compatibility now pass on commit a2777d5.
 
 ## Next Action
-- Address the Node.js 20 deprecation annotations by updating pinned GitHub Actions in a separate maintenance change.
+- Await the next user-requested mission.
 
 ## Blockers
 - None.
 
 ## Last Check
-- Ran: Public Core CI run 33961133482 PASS: Ubuntu Python 3.11/3.14, Windows Python 3.11/3.14, Claude install, and Codex install all succeeded; private run 33961129864 also PASS.
-- Boundary: CI-verified for the corrected test boundary; GitHub reports non-blocking Node.js 20 deprecation annotations for the pinned Actions.
+- Ran: Core CI run 34075661427 passed all 9 jobs; Host Compatibility run 34075668672 passed all 9 jobs; local suite passed 287 tests with 12 expected Windows skips.
+- Boundary: CI-verified for workflow parsing and all configured host install checks; no package publication was performed.
 
 ## Resume
 - Read: `.forge/INTENT.md` and `.forge/MISSION.md` only.
-- Do: Address the Node.js 20 deprecation annotations by updating pinned GitHub Actions in a separate maintenance change.
+- Do: Await the next user-requested mission.

@@ -29,6 +29,8 @@ class ReleaseReceiptMutationTests(unittest.TestCase):
             "plugins/forge/.codex-plugin/plugin.json": '{"version":"0.3.0"}\n',
             "plugins/forge/.claude-plugin/plugin.json": '{"version":"0.3.0"}\n',
             "plugins/forge/.cursor-plugin/plugin.json": '{"version":"0.3.0"}\n',
+            "package.json": '{"version":"0.3.0"}\n',
+            "packages/deepseek-harness/package.json": '{"version":"0.3.0"}\n',
         }.items():
             path = self.repo / relative
             path.parent.mkdir(parents=True, exist_ok=True)

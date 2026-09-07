@@ -680,6 +680,8 @@ def validate() -> list[str]:
         "plugins/forge/.claude-plugin/plugin.json",
         "plugins/forge/.codex-plugin/plugin.json",
         "plugins/forge/.cursor-plugin/plugin.json",
+        "package.json",
+        "packages/deepseek-harness/package.json",
     ):
         path = ROOT / relative
         manifest = json.loads(path.read_text(encoding="utf-8"))
@@ -729,6 +731,52 @@ def validate() -> list[str]:
         line_count = len(text.splitlines())
         if line_count >= 500:
             fail(errors, f"skill exceeds 499 lines: {skill_file} ({line_count})")
+
+    canonical_skill_files = {
+        path.relative_to(PLUGIN / "skills"): path.read_bytes()
+        for path in (PLUGIN / "skills").rglob("*")
+        if path.is_file()
+    }
+    portable_root = (
+        PLUGIN / "skills" / "forge-memory" / "assets" / "portable"
+    )
+    portable_sources = {
+        **{
+            Path("scripts") / name: PLUGIN / "scripts" / name
+            for name in (
+                "forge-init",
+                "forge-status",
+                "forge-checkpoint",
+                "forge-compact",
+                "forge-memory-validate",
+            )
+        },
+        **{
+            Path("lib") / name: PLUGIN / "lib" / name
+            for name in ("forge_files.py", "forge_memory.py")
+        },
+        **{
+            Path("templates") / name: PLUGIN / "templates" / name
+            for name in ("agent-return.md", "assurance-result.md")
+        },
+    }
+    for relative, source in portable_sources.items():
+        target = portable_root / relative
+        if not target.is_file() or target.read_bytes() != source.read_bytes():
+            fail(errors, f"portable helper asset is out of sync: {relative}")
+    for relative in (".agents/skills", "packages/deepseek-harness/skills"):
+        target = ROOT / relative
+        target_files = (
+            {
+                path.relative_to(target): path.read_bytes()
+                for path in target.rglob("*")
+                if path.is_file()
+            }
+            if target.is_dir()
+            else {}
+        )
+        if target_files != canonical_skill_files:
+            fail(errors, f"portable skill payload is out of sync: {relative}")
 
     for template in sorted((PLUGIN / "templates").glob("*.md")):
         if not template.read_text(encoding="utf-8").startswith("---\n"):
@@ -815,16 +863,21 @@ def validate() -> list[str]:
         {"id": "claude-code", "status": "active-native"},
         {"id": "codex", "status": "active-native"},
         {"id": "cursor", "status": "active-native"},
+        {"id": "command-code", "status": "active-core"},
+        {"id": "pi", "status": "active-core"},
+        {"id": "deepseek-harness", "status": "active-core"},
     ]
     if capability.get("host_adapters") != expected_adapters:
         fail(
             errors,
-            "host adapters must be exactly the three active native hosts",
+            "host adapters must match the tiered six-host inventory",
         )
     expected_platforms = [
         {
             "id": "claude-code",
             "delivery": "native",
+            "support_tier": "profile-equivalent",
+            "profile_equivalence": True,
             "manifest": "plugins/forge/.claude-plugin/plugin.json",
             "agents": "plugins/forge/agents",
             "profiles": expected_profiles,
@@ -832,6 +885,8 @@ def validate() -> list[str]:
         {
             "id": "codex",
             "delivery": "native",
+            "support_tier": "profile-equivalent",
+            "profile_equivalence": True,
             "manifest": "plugins/forge/.codex-plugin/plugin.json",
             "agents": "plugins/forge/agent-defs/codex",
             "profiles": expected_profiles,
@@ -839,15 +894,41 @@ def validate() -> list[str]:
         {
             "id": "cursor",
             "delivery": "native",
+            "support_tier": "profile-equivalent",
+            "profile_equivalence": True,
             "manifest": "plugins/forge/.cursor-plugin/plugin.json",
             "agents": "plugins/forge/agent-defs/cursor",
             "profiles": expected_profiles,
+        },
+        {
+            "id": "command-code",
+            "delivery": "agent-skills",
+            "support_tier": "core",
+            "profile_equivalence": False,
+            "manifest": ".agents/skills",
+            "profiles": [],
+        },
+        {
+            "id": "pi",
+            "delivery": "pi-package",
+            "support_tier": "core",
+            "profile_equivalence": False,
+            "manifest": "package.json",
+            "profiles": [],
+        },
+        {
+            "id": "deepseek-harness",
+            "delivery": "dsh-bundle",
+            "support_tier": "core",
+            "profile_equivalence": False,
+            "manifest": "packages/deepseek-harness/package.json",
+            "profiles": [],
         },
     ]
     if capability.get("platforms") != expected_platforms:
         fail(
             errors,
-            "native platform capability inventory is invalid",
+            "tiered platform capability inventory is invalid",
         )
 
     return errors

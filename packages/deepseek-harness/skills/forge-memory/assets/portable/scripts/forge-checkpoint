@@ -1,0 +1,85 @@
+from __future__ import annotations
+
+import argparse
+from datetime import datetime, timezone
+from pathlib import Path
+import sys
+
+
+LIB = Path(__file__).resolve().parents[1] / "lib"
+sys.path.insert(0, str(LIB))
+
+from forge_files import atomic_write, validate_managed_path
+from forge_memory import (
+    ALLOWED_STATES,
+    MemoryValidationError,
+    checkpoint_mission,
+    load_mission,
+)
+
+
+class _ArgumentParser(argparse.ArgumentParser):
+    def error(self, message: str) -> None:
+        raise ValueError(message)
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = _ArgumentParser(prog="forge-checkpoint", add_help=True)
+    parser.add_argument("project_root", metavar="PROJECT_ROOT")
+    parser.add_argument("--state", required=True, choices=sorted(ALLOWED_STATES))
+    parser.add_argument("--delivery", required=True)
+    parser.add_argument("--next-action", required=True)
+    parser.add_argument("--check-run", required=True)
+    parser.add_argument("--check-boundary", required=True)
+    parser.add_argument("--blocker", action="append")
+    return parser
+
+
+def _error(message: str, *, code: int = 2) -> int:
+    print(f"forge-checkpoint ERROR: {message}", file=sys.stderr)
+    return code
+
+
+def main(arguments: list[str]) -> int:
+    try:
+        options = _parser().parse_args(arguments)
+    except ValueError as error:
+        message = str(error) if str(error) else "invalid arguments"
+        return _error(message)
+
+    project_root = Path(options.project_root)
+    if project_root.name.lower() == ".forge":
+        return _error("PROJECT_ROOT must not be a .forge directory")
+    if not project_root.is_dir():
+        return _error(f"PROJECT_ROOT is not a directory: {project_root}", code=1)
+    forge = project_root / ".forge"
+    mission_path = forge / "MISSION.md"
+
+    try:
+        validate_managed_path(project_root, mission_path)
+        mission = load_mission(mission_path)
+        checkpointed_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        rendered = checkpoint_mission(
+            mission,
+            state=options.state,
+            checkpointed_at=checkpointed_at,
+            latest_delivery=options.delivery,
+            next_action=options.next_action,
+            last_check_run=options.check_run,
+            last_check_boundary=options.check_boundary,
+            blockers=tuple(options.blocker) if options.blocker else None,
+        )
+        atomic_write(
+            project_root,
+            mission_path,
+            rendered.encode("utf-8"),
+        )
+    except (MemoryValidationError, OSError, UnicodeError, ValueError) as error:
+        return _error(str(error), code=1)
+
+    print(f"forge-checkpoint updated {mission_path}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

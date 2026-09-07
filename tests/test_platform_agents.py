@@ -55,12 +55,20 @@ class PlatformAgentPackagingTests(unittest.TestCase):
             "bash -n scripts/release.sh",
             'CLAUDE_CODE_VERSION: "2.1.261"',
             'CODEX_VERSION: "0.153.4"',
+            'COMMAND_CODE_VERSION: "1.49.1"',
+            'PI_VERSION: "0.85.1"',
+            '"@earendil-works/pi-coding-agent@${PI_VERSION}"',
+            'DSH_VERSION: "0.1.2-rc.1"',
             'claude plugin marketplace add "$GITHUB_WORKSPACE"',
             "claude plugin install forge@forge --scope user",
             'codex plugin marketplace add "$GITHUB_WORKSPACE" --json',
             "codex plugin add forge@forge --json",
             "HOME: ${{ runner.temp }}/claude-home",
             "CODEX_HOME: ${{ runner.temp }}/codex-home",
+            "command-code skills list",
+            'pi install "$GITHUB_WORKSPACE"',
+            'dsh plugin --profile forge-smoke add "$GITHUB_WORKSPACE/packages/deepseek-harness"',
+            "dsh --profile forge-smoke --dump-config",
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, workflow)
@@ -81,17 +89,48 @@ class PlatformAgentPackagingTests(unittest.TestCase):
             "timeout-minutes:",
             "@anthropic-ai/claude-code@latest",
             "@openai/codex@latest",
+            "command-code@latest",
+            "@earendil-works/pi-coding-agent@latest",
+            "@deepseek-ai/dsh@latest",
             'claude plugin marketplace add "$GITHUB_WORKSPACE"',
             'codex plugin marketplace add "$GITHUB_WORKSPACE" --json',
             "github.repository == 'y8gao/forge'",
             "claude plugin marketplace add y8gao/forge",
             "codex plugin marketplace add y8gao/forge --ref main --json",
+            "command-code skills add y8gao/forge@main",
+            "pi install git:github.com/y8gao/forge@main",
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, workflow)
         self.assertNotIn("ANTHROPIC_API_KEY", workflow)
         self.assertNotIn("OPENAI_API_KEY", workflow)
         self.assertNotRegex(workflow, r"actions/(?:checkout|setup-node)@v\d")
+
+    def test_job_environment_does_not_use_runner_context(self) -> None:
+        for name in ("ci.yml", "host-compatibility.yml"):
+            with self.subTest(workflow=name):
+                workflow = (ROOT / ".github/workflows" / name).read_text(
+                    encoding="utf-8"
+                )
+                job_env_blocks = re.findall(
+                    r"(?m)^    env:\n((?:      .*(?:\n|$))*)",
+                    workflow,
+                )
+                for block in job_env_blocks:
+                    self.assertNotIn("${{ runner.", block)
+
+    def test_dsh_jobs_install_pnpm_before_managing_plugins(self) -> None:
+        for name in ("ci.yml", "host-compatibility.yml"):
+            with self.subTest(workflow=name):
+                workflow = (ROOT / ".github/workflows" / name).read_text(
+                    encoding="utf-8"
+                )
+                pnpm_install = "npm install --global pnpm@10.17.1"
+                self.assertIn(pnpm_install, workflow)
+                self.assertLess(
+                    workflow.index(pnpm_install),
+                    workflow.index("dsh plugin --profile"),
+                )
 
     def test_readme_documents_ci_host_coverage_boundary(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
@@ -104,6 +143,9 @@ class PlatformAgentPackagingTests(unittest.TestCase):
             "Claude Code",
             "Codex",
             "Cursor",
+            "Command Code",
+            "Pi",
+            "DeepSeek Harness",
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, validation)
@@ -131,7 +173,8 @@ class PlatformAgentPackagingTests(unittest.TestCase):
             "Direct by default",
             "Extra control only when asked",
             "Focused capabilities, not a simulated team",
-            "Native across three hosts",
+            "Native profile parity on three hosts",
+            "Portable Core on three more",
             "No runtime to operate",
             "## How it works",
             "Only the host agent writes active control memory",
@@ -145,7 +188,7 @@ class PlatformAgentPackagingTests(unittest.TestCase):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         use = readme.split("## Use\n", 1)[1].split("\n## Validate", 1)[0]
         for phrase in (
-            "Claude Code, Codex, or Cursor",
+            "Claude Code, Codex, Cursor, Command Code, Pi, or DeepSeek Harness",
             "ordinary work",
             "at most 3 iterations",
             "independent report-only",
@@ -163,6 +206,19 @@ class PlatformAgentPackagingTests(unittest.TestCase):
         self.assertNotIn("Invoke `forge-loop`", use)
         for internal_term in ("Core", "Assurance", "Checker", "checkpoint", "active mission"):
             self.assertNotIn(internal_term, use)
+
+    def test_readme_documents_new_host_installs_and_profile_boundary(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for phrase in (
+            "command-code skills add y8gao/forge",
+            "pi install git:github.com/y8gao/forge@main",
+            "dsh plugin --profile",
+            "0.1.2-rc.1",
+            "Core-level support",
+            "does not guarantee Scout/Builder/Checker permission isolation",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, readme)
 
     def test_wrapper_inventory_is_exact(self) -> None:
         expected = {f"{name}.md" for name in PROFILES}
@@ -228,7 +284,7 @@ class PlatformAgentPackagingTests(unittest.TestCase):
                 self.assertIn("templates/agent-return.md", instructions)
                 self.assertLess(len(instructions.splitlines()), 10)
 
-    def test_platform_capabilities_claim_exact_native_hosts(self) -> None:
+    def test_platform_capabilities_claim_exact_tiered_hosts(self) -> None:
         data = json.loads(
             (PLUGIN / "platform-capabilities.json").read_text(encoding="utf-8")
         )
@@ -238,16 +294,31 @@ class PlatformAgentPackagingTests(unittest.TestCase):
                 {"id": "claude-code", "status": "active-native"},
                 {"id": "codex", "status": "active-native"},
                 {"id": "cursor", "status": "active-native"},
+                {"id": "command-code", "status": "active-core"},
+                {"id": "pi", "status": "active-core"},
+                {"id": "deepseek-harness", "status": "active-core"},
             ],
             data["host_adapters"],
         )
         self.assertEqual(
-            {"claude-code", "codex", "cursor"},
+            {
+                "claude-code",
+                "codex",
+                "cursor",
+                "command-code",
+                "pi",
+                "deepseek-harness",
+            },
             {platform["id"] for platform in data["platforms"]},
         )
-        for platform in data["platforms"]:
+        for platform in data["platforms"][:3]:
             self.assertEqual("native", platform["delivery"])
             self.assertEqual(list(PROFILES), platform["profiles"])
+            self.assertTrue(platform["profile_equivalence"])
+        for platform in data["platforms"][3:]:
+            self.assertEqual("core", platform["support_tier"])
+            self.assertEqual([], platform["profiles"])
+            self.assertFalse(platform["profile_equivalence"])
         serialized = json.dumps(data).lower()
         self.assertNotIn("copilot", serialized)
         self.assertNotIn("vscode", serialized)

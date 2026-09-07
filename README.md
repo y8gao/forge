@@ -18,8 +18,10 @@ current outcome, boundaries, progress, and next action.
   explicit opt-ins for work that needs iteration or stronger checking.
 - **Focused capabilities, not a simulated team.** Scout, Builder, and Checker
   are temporary task profiles rather than permanent roles or a fixed pipeline.
-- **Native across three hosts.** Claude Code, Codex, and Cursor share the same
-  Memory-First semantics through thin native packages.
+- **Native profile parity on three hosts.** Claude Code, Codex, and Cursor use
+  thin native packages with host-enforced Scout, Builder, and Checker wrappers.
+- **Portable Core on three more.** Command Code, Pi, and DeepSeek Harness load
+  the same nine Memory-First skills through their standard package mechanisms.
 - **No runtime to operate.** Forge is a content package with Markdown memory and
   small local helpers—no daemon, scheduler, database, or lock service.
 
@@ -39,11 +41,15 @@ and other external effects still require specific authorization.
 - Claude Code: native plugin in `plugins/forge/.claude-plugin/plugin.json`
 - Codex: native plugin in `plugins/forge/.codex-plugin/plugin.json`
 - Cursor: native plugin in `plugins/forge/.cursor-plugin/plugin.json`
+- Command Code: standard Agent Skills from `.agents/skills`
+- Pi Coding Agent: Pi package declared by the root `package.json`
+- DeepSeek Harness: experimental DSH bundle in `packages/deepseek-harness`
 
-All three packages expose the same shared skills and exactly three capability
-profiles: `forge-scout`, `forge-builder`, and `forge-checker`. Host wrappers
-contain only native metadata, permissions, and references to shared contracts.
-GitHub Copilot and VS Code are not first-class Forge product hosts.
+All six hosts receive the same nine skills. Claude Code, Codex, and Cursor also
+provide native wrappers for `forge-scout`, `forge-builder`, and
+`forge-checker`. Command Code, Pi, and DeepSeek Harness have Core-level support.
+Forge does not guarantee Scout/Builder/Checker permission isolation on those
+hosts, although the profile skills remain available.
 
 ## Install
 
@@ -68,13 +74,45 @@ marketplace, then install `forge`. The package explicitly declares shared
 skills, a Cursor orientation rule, and the three native agents. Skills are the
 only slash-invokable Forge entrypoints, avoiding duplicate command names.
 
-Install through the native Claude Code, Codex, or Cursor package surface and
-initialize projects directly with Memory-First control memory.
+### Command Code
+
+Command Code 1.49.1 or newer requires Node.js 22. Install the repository's
+standard Agent Skills and select all nine Forge skills:
+
+```sh
+command-code skills add y8gao/forge
+```
+
+On native Windows, the shorter CLI alias is `cmdc`; `command-code` works on all
+platforms.
+
+### Pi Coding Agent
+
+With Pi Coding Agent 0.85.1 or newer on Node.js 22.19 or newer, install the Git
+package; Pi reads `pi.skills` from the root package manifest:
+
+```sh
+pi install git:github.com/y8gao/forge@main
+```
+
+### DeepSeek Harness
+
+DeepSeek Harness support is experimental and pinned to `0.1.2-rc.1` on Node.js
+22.19 or newer. From a Forge checkout, install the bundle into the desired DSH
+profile:
+
+```sh
+dsh plugin --profile default add ./packages/deepseek-harness
+```
+
+The bundle registers all nine packaged skills with skill-local resource bases.
+It can be installed as `forge-memory-first-dsh` after that package is published;
+this repository does not publish automatically.
 
 ## Use
 
-In Claude Code, Codex, or Cursor, describe the outcome you want in ordinary
-language:
+In Claude Code, Codex, Cursor, Command Code, Pi, or DeepSeek Harness, describe
+the outcome you want in ordinary language:
 
 - For ordinary work, Forge reads the saved project direction, restates the
   outcome, and handles the task directly.
@@ -99,25 +137,30 @@ under `.forge/archive/` is not loaded by default.
 
 ```sh
 python -m unittest tests.test_platform_agents tests.test_cursor_package \
+  tests.test_portable_hosts \
   tests.test_release tests.test_release_receipt
 python scripts/validate-content.py
 git diff --check
 ```
 
 Core CI runs the full suite and validators on Ubuntu and Windows. Pull requests
-also install Forge through Claude Code and Codex using fixed CLI versions in
-isolated homes. A weekly Host Compatibility workflow repeats those checks with
-the latest CLIs and verifies the public marketplace path.
+also run package checks with fixed CLI versions. They cover Claude Code, Codex,
+Command Code, Pi, and the experimental DeepSeek Harness bundle. A weekly Host
+Compatibility workflow repeats those checks with the latest CLIs and verifies
+available public Git or marketplace paths.
 
 Cursor manifests, component paths, and native agents are covered by blocking
 static contract tests. Cursor does not currently expose a supported headless
 installer, so CI does not claim a live Cursor installation test.
+DeepSeek Harness public npm installation remains unchecked until
+`forge-memory-first-dsh` is published; CI composes the package from checkout.
 
 ## Versioning
 
 The canonical version is `VERSION`. Release preparation synchronizes it with
-the Claude Code, Codex, and Cursor plugin manifests. Release tooling is local
-and two-phase; it does not publish automatically:
+the Claude Code, Codex, and Cursor plugin manifests plus the Pi and DeepSeek
+Harness package manifests. Release tooling is local and two-phase; it does not
+publish automatically:
 
 ```sh
 scripts/release.sh prepare <version>

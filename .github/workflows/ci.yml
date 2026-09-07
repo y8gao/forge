@@ -98,3 +98,75 @@ jobs:
           assert data["marketplaceName"] == "forge", data
           assert data["installedPath"], data
           PY
+
+  command-code-install:
+    name: Command Code skills / pinned
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      COMMAND_CODE_VERSION: "1.49.1"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Install pinned Command Code CLI
+        run: npm install --global "command-code@${COMMAND_CODE_VERSION}"
+      - name: Discover portable project skills
+        env:
+          HOME: ${{ runner.temp }}/command-code-home
+        run: |
+          mkdir -p "$HOME"
+          command-code skills list > "$RUNNER_TEMP/command-code-skills.txt"
+          grep -F "forge-core" "$RUNNER_TEMP/command-code-skills.txt"
+          grep -F "forge-memory" "$RUNNER_TEMP/command-code-skills.txt"
+
+  pi-install:
+    name: Pi package / pinned
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PI_VERSION: "0.85.1"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.19.0"
+      - name: Install pinned Pi CLI
+        run: npm install --global "@earendil-works/pi-coding-agent@${PI_VERSION}"
+      - name: Install local Pi package
+        env:
+          HOME: ${{ runner.temp }}/pi-home
+        run: |
+          mkdir -p "$HOME"
+          pi install "$GITHUB_WORKSPACE"
+          pi list
+
+  dsh-install:
+    name: DeepSeek Harness bundle / pinned experimental
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DSH_VERSION: "0.1.2-rc.1"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.19.0"
+      - name: Install pinned pnpm
+        run: npm install --global pnpm@10.17.1
+      - name: Install pinned DeepSeek Harness CLI
+        run: npm install --global "@deepseek-ai/dsh@${DSH_VERSION}"
+      - name: Install and compose local bundle
+        env:
+          DSH_HOME: ${{ runner.temp }}/dsh-home
+        run: |
+          dsh plugin --profile forge-smoke add "$GITHUB_WORKSPACE/packages/deepseek-harness"
+          dsh --profile forge-smoke --dump-config > "$RUNNER_TEMP/dsh-config.yml"
+          grep -F "forge-memory-first-skills" "$RUNNER_TEMP/dsh-config.yml"

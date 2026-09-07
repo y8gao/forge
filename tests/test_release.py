@@ -18,11 +18,13 @@ MANIFESTS = (
     "plugins/forge/.claude-plugin/plugin.json",
     "plugins/forge/.codex-plugin/plugin.json",
     "plugins/forge/.cursor-plugin/plugin.json",
+    "package.json",
+    "packages/deepseek-harness/package.json",
 )
 
 
 class ReleaseStaticTests(unittest.TestCase):
-    def test_version_is_synchronized_across_three_host_manifests(self) -> None:
+    def test_version_is_synchronized_across_all_package_manifests(self) -> None:
         version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
         self.assertRegex(version, r"^[0-9]+\.[0-9]+\.[0-9]+$")
         for relative in MANIFESTS:
@@ -52,7 +54,14 @@ class ReleaseStaticTests(unittest.TestCase):
 
     def test_release_allowlist_matches_receipt_validator(self) -> None:
         module = runpy.run_path(str(ROOT / "scripts/validate_release_receipt.py"))
-        expected = ["VERSION", *MANIFESTS[1::-1], MANIFESTS[2]]
+        expected = [
+            "VERSION",
+            MANIFESTS[1],
+            MANIFESTS[0],
+            MANIFESTS[2],
+            MANIFESTS[3],
+            MANIFESTS[4],
+        ]
         self.assertEqual(expected, module["CANONICAL_ALLOWLIST"])
         release = RELEASE.read_text(encoding="utf-8")
         for relative in expected:
