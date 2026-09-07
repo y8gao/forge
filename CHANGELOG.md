@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-07
+
 ### Added
 - Added cross-platform core CI, pinned Claude Code and Codex installation gates,
   and scheduled latest-host compatibility monitoring.

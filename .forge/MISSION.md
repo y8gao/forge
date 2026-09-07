@@ -1,38 +1,38 @@
 ---
 format: "forge-memory-v1"
-mission_id: "atomic-intent-publication"
-state: "done"
-checkpointed_at: "2026-09-07T09:18:22Z"
+mission_id: "release-forge-0.2.0"
+state: "ready"
+checkpointed_at: null
 ---
 # Current Mission
 
 ## Outcome
-- Statement: Ensure every supported INTENT update is prevalidated and atomically published.
+- Statement: Publish Forge version 0.2.0 from the verified main branch.
 
 ## Scope
-- In: A minimal INTENT replacement helper, Memory guidance, portable synchronization, regression tests, and fresh watcher validation.
-- Out: Schema changes, multi-user locking, Mission behavior changes, runtime hooks, commits, pushes, real CI, Cursor automatic discovery, or Windows OS sandbox support.
-- Constraints: Reuse shared atomic-write semantics; preserve the current INTENT schema and host-only authority; add no daemon or control plane.
+- In: Changelog finalization, release preparation checks, synchronized version manifests, release commit, v0.2.0 tag, push, GitHub Release, and post-publication verification.
+- Out: Additional product changes, dependency upgrades, automated deployment, or unrelated repository cleanup.
+- Constraints: Follow scripts/release.sh and its allowlist/receipt protocol; preserve existing release history; stop on any failed check.
 
 ## Success Criteria
-- [x] Invalid replacement INTENT bytes fail before any active write and valid replacements preserve exact validated bytes.
-- [x] INTENT publication uses same-directory atomic replacement and leaves no temporary file on success or failure.
-- [x] Forge guidance directs durable INTENT updates through the supported helper while routine checkpoints remain MISSION-only.
-- [x] Targeted and full tests, portable checks, and a fresh watcher rehearsal pass without a transient invalid INTENT version.
+- [ ] Changelog contains a committed 0.2.0 entry and the preparation branch is clean and synchronized.
+- [ ] release.sh prepares and validates exactly the six allowed version files for 0.2.0.
+- [ ] The release commit and v0.2.0 tag are pushed and their CI evidence is reported honestly.
+- [ ] A non-draft, non-prerelease GitHub Release for v0.2.0 is published and verified.
 
 ## Latest Delivery
-- Added forge-intent for prevalidated atomic INTENT publication, wired it into Memory guidance and portable payloads, and verified the real fresh-agent path with a 1ms watcher.
+- User authorized publishing Forge v0.2.0.
 
 ## Next Action
-- Review the ready changes; commit or push only on explicit request.
+- Finalize and commit the 0.2.0 Changelog entry.
 
 ## Blockers
 - None.
 
 ## Last Check
-- Ran: Four forge-intent tests passed after confirmed RED failures; full unittest suite ran 317 tests OK with 12 expected skips; sync, content, active-memory, and diff checks passed; installed/source hashes matched 47/47; fresh watcher observed exactly two valid INTENT versions and no empty or partial state.
-- Boundary: Locally verified on Windows with explicit Cursor --plugin-dir and an isolated Git workspace; no real CI, Windows OS sandbox, automatic CLI discovery, commit, or push.
+- Ran: Confirmed main matched origin/main, v0.2.0 was absent, v0.1.0 remained latest, and Core CI passed for the reliability commit.
+- Boundary: Changelog, version manifests, release receipt, tag, and GitHub Release have not been created.
 
 ## Resume
 - Read: `.forge/INTENT.md` and `.forge/MISSION.md` only.
-- Do: Review the ready changes; commit or push only on explicit request.
+- Do: Finalize and commit the 0.2.0 Changelog entry.
