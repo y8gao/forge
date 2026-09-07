@@ -221,6 +221,31 @@ class ValidateContentMutationTests(unittest.TestCase):
         )
         self.assert_mutation_fails()
 
+    def test_safe_mission_rewrite_weakening_fails(self) -> None:
+        self.mutate_text(
+            "plugins/forge/skills/forge-memory/SKILL.md",
+            "The active `.forge/MISSION.md` is a publication destination, never a draft.",
+            "The active `.forge/MISSION.md` may be used as an intermediate draft.",
+        )
+        self.assert_mutation_fails()
+
+    def test_atomic_intent_publication_weakening_fails(self) -> None:
+        self.mutate_text(
+            "plugins/forge/skills/forge-memory/SKILL.md",
+            "Never create, truncate, or patch active INTENT as\n"
+            "an intermediate draft.",
+            "Patch active INTENT directly before validating its contents.",
+        )
+        self.assert_mutation_fails()
+
+    def test_artifact_lens_taxonomy_weakening_fails(self) -> None:
+        self.mutate_text(
+            "plugins/forge/skills/forge-core/SKILL.md",
+            "Primary and supporting lenses are perspectives on artifacts, not roles,",
+            "Implementation is a valid primary lens and permanent role,",
+        )
+        self.assert_mutation_fails()
+
     def test_five_checkpoint_trigger_weakening_fails(self) -> None:
         self.mutate_text(
             "plugins/forge/skills/forge-memory/SKILL.md",

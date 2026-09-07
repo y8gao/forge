@@ -24,6 +24,10 @@ BRIDGE = (
     "## Forge Memory-First\n"
     "Read `.forge/INTENT.md` and `.forge/MISSION.md` on entry and follow the "
     "current outcome and next action.\n"
+    "Outcome and Next Action come from MISSION; change INTENT only for a "
+    "user-confirmed durable project-level decision.\n"
+    "Publish durable INTENT updates through forge-intent; never patch active "
+    "INTENT as a draft.\n"
     "Before substantive implementation, ensure MISSION fits the confirmed "
     'request; if it has `mission_id: "initial"`, activate a real Mission first.\n'
     "Run `forge-memory-validate` after every active-memory write.\n"

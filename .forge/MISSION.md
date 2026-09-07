@@ -1,38 +1,38 @@
 ---
 format: "forge-memory-v1"
-mission_id: "adaptive-artifact-reasoning"
+mission_id: "atomic-intent-publication"
 state: "done"
-checkpointed_at: "2026-09-07T06:42:08Z"
+checkpointed_at: "2026-09-07T09:18:22Z"
 ---
 # Current Mission
 
 ## Outcome
-- Statement: Integrate adaptive artifact reasoning and per-delivery capability selection into Forge.
+- Statement: Ensure every supported INTENT update is prevalidated and atomically published.
 
 ## Scope
-- In: Core reasoning kernel, five artifact lenses, per-cycle capability matching, profile alignment, documentation, portable synchronization, dogfood, and independent Assurance.
-- Out: Fixed roles, automatic pipelines, central capability registries, deterministic routers, runtime orchestration, new memory fields, commits, pushes, or edits to the approved plan file.
-- Constraints: Keep host-direct execution, explicit Loop and Assurance, existing checkpoint semantics, portable host support, and every SKILL.md under 500 lines.
+- In: A minimal INTENT replacement helper, Memory guidance, portable synchronization, regression tests, and fresh watcher validation.
+- Out: Schema changes, multi-user locking, Mission behavior changes, runtime hooks, commits, pushes, real CI, Cursor automatic discovery, or Windows OS sandbox support.
+- Constraints: Reuse shared atomic-write semantics; preserve the current INTENT schema and host-only authority; add no daemon or control plane.
 
 ## Success Criteria
-- [x] Core defines one systems-informed reasoning kernel, five artifact lenses, and minimum sufficient host-capability selection without fixed roles or a router.
-- [x] Loop re-evaluates lenses and capabilities per visible delivery without treating selection as delivery or broadening authority.
-- [x] Builder, Scout, Checker, Assurance, README, CHANGELOG, and durable Intent remain aligned with existing profile, memory, and authority boundaries.
-- [x] Canonical and portable contracts pass targeted and full checks; five artifact scenarios and fresh independent Assurance cover the scoped claims.
+- [x] Invalid replacement INTENT bytes fail before any active write and valid replacements preserve exact validated bytes.
+- [x] INTENT publication uses same-directory atomic replacement and leaves no temporary file on success or failure.
+- [x] Forge guidance directs durable INTENT updates through the supported helper while routine checkpoints remain MISSION-only.
+- [x] Targeted and full tests, portable checks, and a fresh watcher rehearsal pass without a transient invalid INTENT version.
 
 ## Latest Delivery
-- Delivered adaptive artifact reasoning across Core and Loop, aligned temporary profiles and docs, synchronized portable hosts, and passed five-scenario dogfood plus fresh independent Assurance.
+- Added forge-intent for prevalidated atomic INTENT publication, wired it into Memory guidance and portable payloads, and verified the real fresh-agent path with a 1ms watcher.
 
 ## Next Action
-- Await user review and explicit authorization before any commit or push.
+- Review the ready changes; commit or push only on explicit request.
 
 ## Blockers
 - None.
 
 ## Last Check
-- Ran: Host: 90 targeted tests passed; full suite 298 passed with 12 expected Windows skips; validate-content, portable sync, memory validation, and git diff checks passed. Fresh Checkers passed claims 1-2, found and re-checked the corrected Mission alignment, then passed claim 3.
-- Boundary: Locally verified and independently reviewed in Cursor; real CI and live external-host execution remain unchecked.
+- Ran: Four forge-intent tests passed after confirmed RED failures; full unittest suite ran 317 tests OK with 12 expected skips; sync, content, active-memory, and diff checks passed; installed/source hashes matched 47/47; fresh watcher observed exactly two valid INTENT versions and no empty or partial state.
+- Boundary: Locally verified on Windows with explicit Cursor --plugin-dir and an isolated Git workspace; no real CI, Windows OS sandbox, automatic CLI discovery, commit, or push.
 
 ## Resume
 - Read: `.forge/INTENT.md` and `.forge/MISSION.md` only.
-- Do: Await user review and explicit authorization before any commit or push.
+- Do: Review the ready changes; commit or push only on explicit request.

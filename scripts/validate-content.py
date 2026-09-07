@@ -31,6 +31,15 @@ MEMORY_FIRST_MARKERS = {
             "No mode, profile, or workflow choice grants permission for "
             "external side effects."
         ),
+        (
+            "The canonical artifact lens titles are exactly Documentation, "
+            "Architecture, UI/UX, Code, and Testing."
+        ),
+        (
+            "Discovery, design, implementation, verification, and external "
+            "interaction are capability or action categories, not artifact lenses."
+        ),
+        "Primary and supporting lenses are perspectives on artifacts, not roles,",
         "Do not report Mission completion until post-write validation passes.",
     ),
     PLUGIN / "skills" / "forge-memory" / "SKILL.md": (
@@ -51,6 +60,19 @@ MEMORY_FIRST_MARKERS = {
         "These are exact wire-format tokens, not prose",
         "`completed` is invalid",
         "`forge-checkpoint PROJECT_ROOT --state done`",
+        "Routine checkpoints update MISSION only.",
+        (
+            "Do not mirror Mission Outcome, State, Latest Delivery, Next Action, "
+            "Blockers, Last Check, or Resume into INTENT Direction."
+        ),
+        "`forge-intent PROJECT_ROOT --replace-from INTENT_FILE`",
+        (
+            "Never create, truncate, or patch active INTENT as an intermediate "
+            "draft."
+        ),
+        "The active `.forge/MISSION.md` is a publication destination, never a draft.",
+        "as `ready` with `checkpointed_at: null`",
+        "preserve the current State and checkpointed_at",
         "After every active-memory write, run `forge-memory-validate`",
         "Do not report a checkpoint or completion until validation passes",
         "External recall is deferred",

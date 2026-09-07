@@ -8,6 +8,10 @@ import re
 ALLOWED_STATES = {"ready", "working", "blocked", "paused", "done"}
 INTENT_MAX_LINES = 100
 MISSION_MAX_LINES = 60
+_STRICT_UTC_TIMESTAMP = re.compile(
+    r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z",
+    re.ASCII,
+)
 
 PUBLIC_API = (
     "load_intent",
@@ -62,7 +66,7 @@ format: "forge-memory-v1"
 - User: A developer working with coding agents.
 
 ## Direction
-- Current: Confirm the first useful outcome for this project.
+- Current: Keep project intent and active work recoverable across coding-agent sessions.
 
 ## Decisions
 ### D-001: Markdown is canonical control memory
@@ -355,10 +359,25 @@ def load_intent(path: str | Path) -> IntentMemory:
         section="Direction",
         labels=("Current",),
     )
+    direction_value = direction["Current"]
+    mission_continuity = (
+        r"\b(?:mission_id|checkpointed_at)\s*:",
+        r"\bstate\s*:\s*(?:ready|working|blocked|paused|done)\b",
+        r"\b(?:Latest Delivery|Next Action|Last Check|Mission Outcome|"
+        r"Mission State|Mission Resume)\b",
+        r"\b(?:paused|blocked)\s+pending\b",
+    )
+    if any(
+        re.search(pattern, direction_value, re.IGNORECASE)
+        for pattern in mission_continuity
+    ):
+        raise MemoryValidationError(
+            "INTENT: Direction must not contain Mission continuity or lifecycle state"
+        )
     return IntentMemory(
         purpose_why=purpose["Why"],
         purpose_user=purpose["User"],
-        direction=direction["Current"],
+        direction=direction_value,
         decisions=_parse_decisions(sections["## Decisions"]),
         constraints=_bullet_values(
             sections["## Constraints"], kind="INTENT", section="Constraints"
@@ -389,6 +408,7 @@ def load_mission(path: str | Path) -> MissionMemory:
         raise MemoryValidationError(
             "MISSION: checkpointed_at must be a string or null"
         )
+    _validate_timestamp_semantics(state, checkpointed_at)
 
     sections = _sections(body, kind="MISSION", headings=_MISSION_HEADINGS)
     outcome = _labeled_fields(
@@ -468,6 +488,33 @@ def _checkpoint_value(name: str, value: str) -> str:
     return value.strip()
 
 
+def _validate_timestamp_semantics(
+    state: str, checkpointed_at: str | None
+) -> None:
+    if state == "ready":
+        if checkpointed_at is not None:
+            raise MemoryValidationError(
+                "MISSION: ready state requires checkpointed_at to be null"
+            )
+        return
+    if checkpointed_at is None:
+        raise MemoryValidationError(
+            "MISSION: non-ready state requires checkpointed_at"
+        )
+    if _STRICT_UTC_TIMESTAMP.fullmatch(checkpointed_at) is None:
+        raise MemoryValidationError(
+            "MISSION: checkpointed_at must use strict YYYY-MM-DDTHH:MM:SSZ UTC format"
+        )
+    try:
+        from datetime import datetime
+
+        datetime.strptime(checkpointed_at, "%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        raise MemoryValidationError(
+            "MISSION: checkpointed_at must use strict YYYY-MM-DDTHH:MM:SSZ UTC format"
+        ) from None
+
+
 def checkpoint_mission(
     mission: MissionMemory,
     *,
@@ -484,6 +531,10 @@ def checkpoint_mission(
             f"MISSION: checkpoint field state must be one of "
             f"{', '.join(sorted(ALLOWED_STATES))}"
         )
+    if state == "ready":
+        raise MemoryValidationError(
+            "MISSION: checkpoint cannot transition to ready"
+        )
     if state == "done" and any(
         not criterion.startswith("[x] ")
         for criterion in mission.success_criteria
@@ -496,6 +547,7 @@ def checkpoint_mission(
         raise MemoryValidationError(
             "MISSION: checkpoint field checkpointed_at must not contain a quote"
         )
+    _validate_timestamp_semantics(state, checkpointed_at)
     latest_delivery = _checkpoint_value("latest_delivery", latest_delivery)
     next_action = _checkpoint_value("next_action", next_action)
     last_check_run = _checkpoint_value("last_check_run", last_check_run)

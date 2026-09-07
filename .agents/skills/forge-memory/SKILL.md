@@ -22,6 +22,18 @@ Only the host agent writes active control memory. Temporary agents and external
 providers may suggest changes, but they never modify `INTENT.md` or
 `MISSION.md`.
 
+Routine checkpoints update MISSION only. Update INTENT only for a
+user-confirmed durable project-level purpose, direction, decision, constraint,
+or non-goal. Do not mirror Mission Outcome, State, Latest Delivery, Next Action,
+Blockers, Last Check, or Resume into INTENT Direction.
+
+For an authorized durable update, render the complete INTENT candidate outside
+the active path, then invoke
+`forge-intent PROJECT_ROOT --replace-from INTENT_FILE`. The helper prevalidates
+all candidate bytes and atomically replaces `.forge/INTENT.md` through the
+shared safe-write semantics. Never create, truncate, or patch active INTENT as
+an intermediate draft.
+
 Initialize missing active memory with `forge-init`. Validate it with
 `forge-memory-validate`. Resolve every helper from the packaged resource
 `forge-memory/assets/portable/scripts/` and invoke it through `sys.executable`;
@@ -55,7 +67,9 @@ each item uses either `- [ ]` or `- [x]`.
 MISSION state is one of `ready`, `working`, `blocked`, `paused`, or `done`.
 These are exact wire-format tokens, not prose to translate or paraphrase;
 `completed` is invalid. Copy an allowed token exactly whenever rendering or
-checking Mission state.
+checking Mission state. A `ready` Mission has `checkpointed_at: null`.
+`working`, `blocked`, `paused`, and `done` require strict UTC
+`YYYY-MM-DDTHH:MM:SSZ`.
 Keep the active mission concise and current; it is not a task log, role ledger,
 test matrix, or review history.
 
@@ -88,6 +102,8 @@ Mission. Do not checkpoint each tool call, edit, test, or internal step. Use
 forge-checkpoint mutates only continuity fields supported by that command:
 State, checkpoint timestamp, Latest Delivery, Next Action, Blockers, Last Check,
 and Resume.Do. It preserves Outcome, Scope, Success Criteria, and Resume.Read.
+It cannot checkpoint to `ready`, and its generated timestamp must not be earlier
+than the current non-null checkpointed_at; an equal second is valid.
 For `blocked`, pass at least one current `--blocker`. Other states clear stale
 blockers to `None.`. Resume.Do always follows the new Next Action.
 
@@ -98,16 +114,25 @@ validated `working` Mission first, then complete it through forge-checkpoint.
 After every active-memory write, run `forge-memory-validate` against the project.
 Do not report a checkpoint or completion until validation passes.
 
-Changing user-confirmed Scope or Success Criteria requires a direct validated
-host rewrite through the shared safe-write semantics. The host validates the
-complete Mission before publishing it; do not invent a separate script or
-extend forge-checkpoint to bypass its narrow mutation contract.
+The active `.forge/MISSION.md` is a publication destination, never a draft.
+Use one of these two paths:
+
+- Activation or replacement: render the complete candidate outside the active
+  `.forge/MISSION.md` path as `ready` with `checkpointed_at: null`; validate all
+  candidate bytes; publish them with `forge-compact --replace-from`; then run
+  `forge-memory-validate`. Never create, patch, or repair the active Mission as
+  an intermediate draft.
+- Acceptance-boundary update: changing user-confirmed Scope or Success Criteria
+  requires a direct validated host rewrite through the shared safe-write
+  semantics; an Outcome change follows the same path. Form the complete
+  candidate outside the active path, preserve the current State and
+  checkpointed_at, validate the complete candidate, and publish it atomically;
+  then use `forge-checkpoint` for the real state transition and current UTC
+  timestamp. Do not extend forge-checkpoint beyond its narrow mutation contract.
 
 For initial activation, map the confirmed request into Outcome, Scope, and
-Success Criteria; render a complete, non-placeholder `ready` MISSION; publish
-it safely through the replacement MISSION file path; and run
-`forge-memory-validate`. This must publish and validate a real `ready` Mission.
-Only then may substantive implementation begin.
+Success Criteria and follow the activation path above. This must publish and
+validate a real `ready` Mission. Only then may substantive implementation begin.
 
 ## Compact and archive
 
@@ -119,7 +144,8 @@ closed as active memory. It does not invent or activate a follow-up Mission.
 
 For a confirmed replacement, first render the complete user-confirmed Outcome,
 Scope, and Success Criteria into a parser-valid `ready` replacement MISSION
-file, then pass that replacement MISSION file to `forge-compact --replace-from`.
+file with `checkpointed_at: null`, then pass that replacement MISSION file to
+`forge-compact --replace-from`.
 The command validates it and archives the old Mission before exact-byte
 publication. Preserve published archives; if interrupted, follow the command's
 recovery instruction rather than editing an archive by hand.

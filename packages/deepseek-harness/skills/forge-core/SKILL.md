@@ -84,6 +84,9 @@ required report or new process artifact.
 Select one primary lens for the current artifact. Add a supporting lens only
 when it changes a design, action, or check:
 
+The canonical artifact lens titles are exactly Documentation, Architecture,
+UI/UX, Code, and Testing. This is a closed set:
+
 - Documentation: reader task, information hierarchy, factual source, executable
   examples, and drift from the implemented version.
 - Architecture: system boundaries, component responsibilities, control and data
@@ -104,6 +107,8 @@ than one lens without assigning people or profiles to artifact categories.
 For the current action, classify the need as discovery, design, implementation,
 verification, or external interaction. Derive concrete capabilities from the
 active lenses, then inspect only the tools and Skills the host actually exposes.
+Discovery, design, implementation, verification, and external interaction are
+capability or action categories, not artifact lenses.
 Choose the first set that safely satisfies the acceptance boundary:
 
 1. direct native capability;

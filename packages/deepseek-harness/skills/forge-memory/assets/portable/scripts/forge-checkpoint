@@ -27,7 +27,11 @@ class _ArgumentParser(argparse.ArgumentParser):
 def _parser() -> argparse.ArgumentParser:
     parser = _ArgumentParser(prog="forge-checkpoint", add_help=True)
     parser.add_argument("project_root", metavar="PROJECT_ROOT")
-    parser.add_argument("--state", required=True, choices=sorted(ALLOWED_STATES))
+    parser.add_argument(
+        "--state",
+        required=True,
+        choices=sorted(ALLOWED_STATES - {"ready"}),
+    )
     parser.add_argument("--delivery", required=True)
     parser.add_argument("--next-action", required=True)
     parser.add_argument("--check-run", required=True)
@@ -60,6 +64,18 @@ def main(arguments: list[str]) -> int:
         validate_managed_path(project_root, mission_path)
         mission = load_mission(mission_path)
         checkpointed_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        if mission.checkpointed_at is not None:
+            previous_time = datetime.strptime(
+                mission.checkpointed_at, "%Y-%m-%dT%H:%M:%SZ"
+            )
+            current_time = datetime.strptime(
+                checkpointed_at, "%Y-%m-%dT%H:%M:%SZ"
+            )
+            if current_time < previous_time:
+                raise MemoryValidationError(
+                    "MISSION: new checkpointed_at is earlier than the current "
+                    "checkpointed_at"
+                )
         rendered = checkpoint_mission(
             mission,
             state=options.state,

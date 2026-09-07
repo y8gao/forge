@@ -8,7 +8,7 @@ format: "forge-memory-v1"
 - User: A developer working with coding agents.
 
 ## Direction
-- Current: Confirm the first useful outcome for this project.
+- Current: Keep project intent and active work recoverable across coding-agent sessions.
 
 ## Decisions
 ### D-001: Markdown is canonical control memory

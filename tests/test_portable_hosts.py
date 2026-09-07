@@ -46,6 +46,7 @@ class PortableHostPackageTests(unittest.TestCase):
         for relative in (
             "scripts/forge-init",
             "scripts/forge-status",
+            "scripts/forge-intent",
             "scripts/forge-checkpoint",
             "scripts/forge-compact",
             "scripts/forge-memory-validate",

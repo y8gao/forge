@@ -258,6 +258,14 @@ class LoopUserJourneyContractTests(unittest.TestCase):
         )
         self.assert_markers(
             delivery,
+            "canonical Core lens title",
+            "Documentation, Architecture, UI/UX, Code, or Testing",
+            "Capability or action categories such as discovery, design, "
+            "implementation, verification, and external interaction must not "
+            "be reported as the primary lens",
+        )
+        self.assert_markers(
+            delivery,
             "Choosing a lens, tool, Skill, or profile is not a visible delta",
             "does not automatically call Checker",
             "does not activate Assurance",

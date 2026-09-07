@@ -131,6 +131,10 @@ def main(arguments: list[str]) -> int:
             target_mission_id = _safe_mission_id(replacement.mission_id)
             if replacement.state != "ready":
                 raise ValueError("replacement MISSION state must be ready")
+            if replacement.checkpointed_at is not None:
+                raise ValueError(
+                    "replacement MISSION ready state requires checkpointed_at null"
+                )
             if (
                 mission.mission_id == target_mission_id
                 and active_bytes == replacement_bytes

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import redirect_stderr, redirect_stdout
+from datetime import datetime, timezone
 from io import StringIO
 from pathlib import Path
 from unittest import mock
@@ -74,6 +75,39 @@ class ForgeCheckpointTests(unittest.TestCase):
         stdout = StringIO()
         stderr = StringIO()
         with redirect_stdout(stdout), redirect_stderr(stderr):
+            returncode = namespace["main"](list(arguments))
+        return subprocess.CompletedProcess(
+            list(arguments),
+            returncode,
+            stdout.getvalue(),
+            stderr.getvalue(),
+        )
+
+    def run_checkpoint_at(
+        self, timestamp: str, *arguments: str
+    ) -> subprocess.CompletedProcess[str]:
+        namespace = runpy.run_path(
+            str(CHECKPOINT), run_name="forge_checkpoint_time_test"
+        )
+        fixed = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ").replace(
+            tzinfo=timezone.utc
+        )
+
+        class FixedDateTime:
+            @classmethod
+            def now(cls, _timezone):
+                return fixed
+
+            @classmethod
+            def strptime(cls, value, format_string):
+                return datetime.strptime(value, format_string)
+
+        stdout = StringIO()
+        stderr = StringIO()
+        with mock.patch.dict(
+            namespace["main"].__globals__,
+            {"datetime": FixedDateTime},
+        ), redirect_stdout(stdout), redirect_stderr(stderr):
             returncode = namespace["main"](list(arguments))
         return subprocess.CompletedProcess(
             list(arguments),
@@ -191,7 +225,7 @@ class ForgeCheckpointTests(unittest.TestCase):
         ):
             result = self.run_checkpoint_in_process(*self.arguments())
 
-        self.assertEqual(1, result.returncode)
+        self.assertNotEqual(0, result.returncode)
         self.assertEqual("", result.stdout)
         self.assertIn("forge-checkpoint ERROR: boom", result.stderr)
         self.assertNotIn("Traceback", result.stderr)
@@ -215,6 +249,41 @@ class ForgeCheckpointTests(unittest.TestCase):
         )
         self.assertNotIn("Traceback", result.stderr)
         self.assertEqual(original, target.read_bytes())
+
+    def test_ready_is_not_a_checkpoint_target_and_preserves_target(self):
+        target = self.forge / "MISSION.md"
+        original = target.read_bytes()
+
+        result = self.run_checkpoint(*self.arguments(state="ready"))
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertRegex(result.stderr, r"checkpoint.*ready")
+        self.assertEqual(original, target.read_bytes())
+
+    def test_checkpoint_rejects_backward_time_and_preserves_target(self):
+        target = self.forge / "MISSION.md"
+        original = target.read_bytes()
+
+        result = self.run_checkpoint_at(
+            "2026-09-01T11:59:59Z",
+            *self.arguments(state="working"),
+        )
+
+        self.assertEqual(1, result.returncode)
+        self.assertRegex(result.stderr, r"checkpointed_at.*earlier")
+        self.assertEqual(original, target.read_bytes())
+
+    def test_checkpoint_allows_equal_timestamp(self):
+        result = self.run_checkpoint_at(
+            "2026-09-01T12:00:00Z",
+            *self.arguments(state="working"),
+        )
+
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(
+            "2026-09-01T12:00:00Z",
+            load_mission(self.forge / "MISSION.md").checkpointed_at,
+        )
 
     def test_blocked_requires_current_blocker_and_preserves_target(self):
         target = self.forge / "MISSION.md"

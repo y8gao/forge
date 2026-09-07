@@ -203,6 +203,53 @@ class CoreUserJourneyContractTests(unittest.TestCase):
         self.assertIn("changes a design, action, or check", kernel)
         self.assertIn("not roles", kernel)
 
+    def test_artifact_lens_titles_are_closed_and_distinct_from_actions(self) -> None:
+        kernel = self.section_text(CORE, "Reason through the current artifact")
+        selection = self.section_text(CORE, "Select the minimum host capability set")
+        self.assertIn(
+            "The canonical artifact lens titles are exactly Documentation, "
+            "Architecture, UI/UX, Code, and Testing",
+            kernel,
+        )
+        self.assertIn("closed set", kernel)
+        self.assertIn(
+            "Discovery, design, implementation, verification, and external "
+            "interaction are capability or action categories, not artifact lenses",
+            selection,
+        )
+
+    def test_active_mission_is_a_validated_destination_not_a_draft(self) -> None:
+        memory = self.memory_text()
+        for marker in (
+            "active `.forge/MISSION.md` is a publication destination, never a draft",
+            "outside the active `.forge/MISSION.md` path",
+            "`ready` with `checkpointed_at: null`",
+            "preserve the current State and checkpointed_at",
+            "then use `forge-checkpoint` for the real state transition",
+        ):
+            self.assertIn(marker, memory)
+
+    def test_routine_checkpoints_do_not_mirror_mission_into_intent(self) -> None:
+        memory = self.memory_text()
+        for marker in (
+            "Routine checkpoints update MISSION only",
+            "user-confirmed durable project-level",
+            "Do not mirror Mission Outcome, State, Latest Delivery, Next Action, "
+            "Blockers, Last Check, or Resume into INTENT Direction",
+        ):
+            self.assertIn(marker, memory)
+
+    def test_durable_intent_updates_use_prevalidated_atomic_publication(self) -> None:
+        memory = self.memory_text()
+        for marker in (
+            "render the complete INTENT candidate outside the active path",
+            "`forge-intent PROJECT_ROOT --replace-from INTENT_FILE`",
+            "prevalidates all candidate bytes",
+            "atomically replaces `.forge/INTENT.md`",
+            "Never create, truncate, or patch active INTENT as an intermediate draft",
+        ):
+            self.assertIn(marker, memory)
+
     def test_core_selects_a_minimum_host_capability_set_without_a_router(
         self,
     ) -> None:

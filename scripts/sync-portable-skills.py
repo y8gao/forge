@@ -24,6 +24,7 @@ RUNTIME_SOURCES = {
         for name in (
             "forge-init",
             "forge-status",
+            "forge-intent",
             "forge-checkpoint",
             "forge-compact",
             "forge-memory-validate",

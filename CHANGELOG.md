@@ -23,6 +23,12 @@ All notable changes to this project are documented in this file.
 - Required a validated non-placeholder Mission before substantive work, added
   explicit Loop checkpoint barriers, and made `forge-init` refresh its managed
   host guidance without changing surrounding user-authored content.
+- Enforced `ready + null` and strict UTC Mission timestamp semantics, rejected
+  backward checkpoints, and kept invalid replacement bytes off the active path.
+- Separated durable INTENT direction from Mission lifecycle fields and locked
+  canonical artifact lens titles apart from capability and action categories.
+- Added prevalidated atomic INTENT publication so durable decision updates
+  cannot expose an empty or partial active control-memory file.
 - Normalized tracked text to LF so portable skill payload checks remain stable
   in Windows worktrees.
 

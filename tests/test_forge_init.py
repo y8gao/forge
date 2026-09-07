@@ -100,6 +100,15 @@ class ForgeInitTests(unittest.TestCase):
             self.assertIn(".forge/MISSION.md", text)
             self.assertIn("outcome", text.lower())
             self.assertIn("next action", text.lower())
+            self.assertIn("Outcome and Next Action come from MISSION", text)
+            self.assertIn(
+                "change INTENT only for a user-confirmed durable project-level decision",
+                text,
+            )
+            self.assertIn(
+                "publish durable intent updates through forge-intent",
+                text.lower(),
+            )
             self.assertIn("before substantive implementation", text.lower())
             self.assertIn('mission_id: "initial"', text)
             self.assertIn("accepted visible delivery", text.lower())

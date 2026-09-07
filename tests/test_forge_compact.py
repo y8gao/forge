@@ -26,12 +26,15 @@ def render_mission(
     state: str = "done",
     outcome: str = "Ship the current visible increment.",
 ) -> str:
+    checkpointed_at = (
+        "null" if state == "ready" else '"2026-09-02T01:02:03Z"'
+    )
     return (
         "---\n"
         'format: "forge-memory-v1"\n'
         f'mission_id: "{mission_id}"\n'
         f'state: "{state}"\n'
-        'checkpointed_at: "2026-09-02T01:02:03Z"\n'
+        f"checkpointed_at: {checkpointed_at}\n"
         "---\n"
         "# Current Mission\n\n"
         "## Outcome\n"
@@ -186,6 +189,7 @@ class ForgeCompactTests(unittest.TestCase):
         mission = load_mission(self.mission_path)
         self.assertEqual("next-mission", mission.mission_id)
         self.assertEqual("ready", mission.state)
+        self.assertIsNone(mission.checkpointed_at)
         self.assertEqual(outcome, mission.outcome)
         self.assertEqual(
             ("Deliver only the user-confirmed next increment.",), mission.scope_in
@@ -223,6 +227,40 @@ class ForgeCompactTests(unittest.TestCase):
         )
         self.assertIn("forge-compact ERROR:", error_text)
         self.assertNotIn("Traceback", error_text)
+        self.assertEqual(original, self.mission_path.read_bytes())
+        self.assertFalse(self.archive_path.exists())
+        self.assertEqual([], writes)
+
+    def test_ready_replacement_with_timestamp_fails_before_any_managed_write(
+        self,
+    ) -> None:
+        from forge_files import atomic_write as real_atomic_write
+
+        original = self.mission_path.read_bytes()
+        replacement = self.replacement_path()
+        replacement.write_text(
+            replacement.read_text(encoding="utf-8").replace(
+                "checkpointed_at: null",
+                'checkpointed_at: "2026-09-02T01:02:03Z"',
+            ),
+            encoding="utf-8",
+        )
+        writes: list[Path] = []
+
+        def recording_write(root, path, data, *, mode=None):
+            writes.append(Path(path))
+            return real_atomic_write(root, path, data, mode=mode)
+
+        code, _ = self.run_in_process(
+            [
+                str(self.project),
+                "--replace-from",
+                str(replacement),
+            ],
+            recording_write,
+        )
+
+        self.assertNotEqual(0, code)
         self.assertEqual(original, self.mission_path.read_bytes())
         self.assertFalse(self.archive_path.exists())
         self.assertEqual([], writes)

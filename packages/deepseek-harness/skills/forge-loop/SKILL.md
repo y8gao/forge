@@ -87,6 +87,10 @@ only when useful for a bounded discovery or implementation slice. For the
 current delta, apply Forge Core's reasoning kernel, choose one primary artifact
 lens plus only supporting lenses that change a design, action, or check, and
 select the minimum host capability set that can satisfy the boundary.
+Use a canonical Core lens title: Documentation, Architecture, UI/UX, Code, or
+Testing. Capability or action categories such as discovery, design,
+implementation, verification, and external interaction must not be reported as
+the primary lens.
 Re-evaluate those choices when the delta, artifact, or risk changes; otherwise
 reuse them.
 

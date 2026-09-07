@@ -59,6 +59,9 @@ class ForgeStatusTests(unittest.TestCase):
             mission = (fixture / "MISSION.md").read_text(encoding="utf-8")
             (forge / "MISSION.md").write_text(
                 mission.replace(
+                    'state: "working"',
+                    'state: "ready"',
+                ).replace(
                     'checkpointed_at: "2026-09-01T12:00:00Z"',
                     "checkpointed_at: null",
                 ),

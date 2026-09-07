@@ -388,12 +388,84 @@ class MemoryContractTests(unittest.TestCase):
                 with self.assertRaisesRegex(MemoryValidationError, "format"):
                     loader(self.temp_path(text, name))
 
-    def test_checkpointed_at_null_is_accepted(self):
+    def test_ready_mission_requires_null_checkpointed_at(self):
         text = self.fixture_text("MISSION.md").replace(
+            'state: "working"', 'state: "ready"'
+        ).replace(
             'checkpointed_at: "2026-09-01T12:00:00Z"', "checkpointed_at: null"
         )
         mission = load_mission(self.temp_path(text, "MISSION.md"))
         self.assertIsNone(mission.checkpointed_at)
+
+        with self.assertRaisesRegex(
+            MemoryValidationError, "ready.*checkpointed_at.*null"
+        ):
+            load_mission(
+                self.temp_path(
+                    text.replace(
+                        "checkpointed_at: null",
+                        'checkpointed_at: "2026-09-01T12:00:00Z"',
+                    ),
+                    "ready-with-time.md",
+                )
+            )
+
+    def test_nonready_mission_requires_strict_utc_checkpointed_at(self):
+        source = self.fixture_text("MISSION.md")
+        cases = (
+            ("checkpointed_at: null", "non-ready.*checkpointed_at"),
+            (
+                'checkpointed_at: "2026-09-01T12:00:00+00:00"',
+                "checkpointed_at.*YYYY-MM-DDTHH:MM:SSZ",
+            ),
+            (
+                'checkpointed_at: "2026-09-01T12:00:00.123Z"',
+                "checkpointed_at.*YYYY-MM-DDTHH:MM:SSZ",
+            ),
+            (
+                'checkpointed_at: "not-a-time"',
+                "checkpointed_at.*YYYY-MM-DDTHH:MM:SSZ",
+            ),
+        )
+        for replacement, message in cases:
+            with self.subTest(replacement=replacement):
+                malformed = source.replace(
+                    'checkpointed_at: "2026-09-01T12:00:00Z"',
+                    replacement,
+                )
+                with self.assertRaisesRegex(MemoryValidationError, message):
+                    load_mission(self.temp_path(malformed, "MISSION.md"))
+
+    def test_intent_direction_rejects_explicit_mission_continuity(self):
+        source = self.fixture_text("INTENT.md")
+        current = "- Current: Ship a small memory-first plugin."
+        for direction in (
+            "- Current: Mirror Latest Delivery into project direction.",
+            "- Current: state: paused pending user approval.",
+            "- Current: mission_id: active-feature",
+            "- Current: paused pending duplicate policy.",
+        ):
+            with self.subTest(direction=direction):
+                with self.assertRaisesRegex(
+                    MemoryValidationError, "Direction.*Mission"
+                ):
+                    load_intent(
+                        self.temp_path(
+                            source.replace(current, direction),
+                            "INTENT.md",
+                        )
+                    )
+
+    def test_intent_direction_accepts_durable_prose_with_common_state_words(self):
+        source = self.fixture_text("INTENT.md")
+        durable = source.replace(
+            "- Current: Ship a small memory-first plugin.",
+            "- Current: Improve the working style when documentation is done.",
+        )
+        self.assertIn(
+            "working style",
+            load_intent(self.temp_path(durable, "INTENT.md")).direction,
+        )
 
     def test_initial_renderers_equal_installed_assets_and_round_trip(self):
         intent_text = render_initial_intent()
@@ -410,6 +482,10 @@ class MemoryContractTests(unittest.TestCase):
         )
         intent = load_intent(self.temp_path(intent_text, "INTENT.md"))
         mission = load_mission(self.temp_path(mission_text, "MISSION.md"))
+        self.assertEqual(
+            "Keep project intent and active work recoverable across coding-agent sessions.",
+            intent.direction,
+        )
         self.assertIn("host agent", intent.constraints[0].lower())
         self.assertIn("runtime", intent.non_goals[0].lower())
         self.assertEqual("initial", mission.mission_id)
@@ -485,10 +561,10 @@ class MemoryContractTests(unittest.TestCase):
 
         self.assertEqual("done", load_mission(self.temp_path(rendered)).state)
 
-    def test_checkpoint_allows_mixed_success_criteria_for_other_states(self):
+    def test_checkpoint_allows_mixed_success_criteria_for_nonready_states(self):
         mission = load_mission(FIXTURES / "MISSION.md")
 
-        for state in ALLOWED_STATES - {"done"}:
+        for state in ALLOWED_STATES - {"ready", "done"}:
             with self.subTest(state=state):
                 extra = (
                     {"blockers": ("User decision required.",)}
@@ -510,6 +586,21 @@ class MemoryContractTests(unittest.TestCase):
                 self.assertEqual("Continue.", updated.resume_do)
                 if state != "blocked":
                     self.assertEqual(("None.",), updated.blockers)
+
+    def test_checkpoint_renderer_rejects_ready_state(self):
+        mission = load_mission(FIXTURES / "MISSION.md")
+        with self.assertRaisesRegex(
+            MemoryValidationError, "checkpoint.*ready"
+        ):
+            checkpoint_mission(
+                mission,
+                state="ready",
+                checkpointed_at="2026-09-02T01:02:03Z",
+                latest_delivery="Delivered.",
+                next_action="Continue.",
+                last_check_run="A check.",
+                last_check_boundary="A boundary.",
+            )
 
     def test_checkpoint_blocked_requires_a_current_blocker(self):
         mission = load_mission(FIXTURES / "MISSION.md")
