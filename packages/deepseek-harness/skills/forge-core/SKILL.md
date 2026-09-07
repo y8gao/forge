@@ -73,6 +73,63 @@ that changes scope, destructive effects, public behavior, cost, or accepted
 risk. For a small, reversible assumption, choose a reasonable value and report
 it instead of blocking useful work.
 
+## Reason through the current artifact
+
+Use one Forge Core reasoning kernel for every task. Establish the outcome and
+boundary, the artifact's system position and sources of truth, its flow and
+state, likely failure and risk, the minimum falsifying evidence, and the
+evolution cost of the solution. These are internal reasoning prompts, not a
+required report or new process artifact.
+
+Select one primary lens for the current artifact. Add a supporting lens only
+when it changes a design, action, or check:
+
+- Documentation: reader task, information hierarchy, factual source, executable
+  examples, and drift from the implemented version.
+- Architecture: system boundaries, component responsibilities, control and data
+  flow, constraints, tradeoffs, failure propagation, and evolution path.
+- UI/UX: user goal, state transitions, information hierarchy, feedback and error
+  states, accessibility, responsive behavior, and visual verification.
+- Code: behavior contracts, callers, control and data flow, dependencies,
+  failures, compatibility, and the minimum regression surface.
+- Testing: falsifiable claims, risk priority, oracle, positive and negative
+  cases, boundary coverage, determinism, and evidence level.
+
+Primary and supporting lenses are perspectives on artifacts, not roles,
+handoffs, or reasons to create a fixed workflow. A composite task may use more
+than one lens without assigning people or profiles to artifact categories.
+
+## Select the minimum host capability set
+
+For the current action, classify the need as discovery, design, implementation,
+verification, or external interaction. Derive concrete capabilities from the
+active lenses, then inspect only the tools and Skills the host actually exposes.
+Choose the first set that safely satisfies the acceptance boundary:
+
+1. direct native capability;
+2. one specialized Skill;
+3. a specialized MCP or external tool;
+4. a necessary combination of capabilities;
+5. a generic capability.
+
+Match from descriptions that state task or artifact triggers, expected output
+and check, non-use cases, authority and side-effect boundary, and safe
+combinations. Use ordinary Agent Skills frontmatter plus body guidance; do not
+depend on unsupported custom frontmatter or a Forge-owned metadata mirror.
+
+Use a temporary profile only when bounded discovery, writes, isolation,
+parallelism, or independent checking materially improves the task. Profile
+selection is separate from artifact lens selection and never broadens
+authority. Installation, paid actions, destructive operations, and external
+writes still require their own applicable authorization.
+
+Re-evaluate when the visible delta, artifact, or risk changes. Otherwise reuse
+the current choice instead of mechanically routing again. Do not persist lens or
+tool selection in active memory, add Mission fields for it, or maintain a
+central registry, scoring database, deterministic router, or mirrored host
+catalog. Record only a resulting user decision, visible delivery, blocker, or
+evidence boundary through the existing checkpoint model.
+
 For implementation, understand the existing control flow and data flow first,
 then climb only as far as needed:
 

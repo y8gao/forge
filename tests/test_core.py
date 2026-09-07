@@ -179,6 +179,73 @@ class CoreUserJourneyContractTests(unittest.TestCase):
         positions = [text.index(marker) for marker in markers]
         self.assertEqual(sorted(positions), positions)
 
+    def test_core_uses_one_systems_reasoning_kernel_across_artifacts(self) -> None:
+        kernel = self.section_text(CORE, "Reason through the current artifact")
+        for marker in (
+            "outcome and boundary",
+            "system position",
+            "flow and state",
+            "failure and risk",
+            "falsifying evidence",
+            "evolution cost",
+        ):
+            self.assertIn(marker, kernel)
+        for lens in (
+            "Documentation",
+            "Architecture",
+            "UI/UX",
+            "Code",
+            "Testing",
+        ):
+            self.assertIn(lens, kernel)
+        self.assertIn("one primary lens", kernel)
+        self.assertIn("supporting lens", kernel)
+        self.assertIn("changes a design, action, or check", kernel)
+        self.assertIn("not roles", kernel)
+
+    def test_core_selects_a_minimum_host_capability_set_without_a_router(
+        self,
+    ) -> None:
+        selection = self.section_text(CORE, "Select the minimum host capability set")
+        for action in (
+            "discovery",
+            "design",
+            "implementation",
+            "verification",
+            "external interaction",
+        ):
+            self.assertIn(action, selection)
+        markers = (
+            "direct native capability",
+            "one specialized Skill",
+            "specialized MCP or external tool",
+            "necessary combination",
+            "generic capability",
+        )
+        positions = [selection.index(marker) for marker in markers]
+        self.assertEqual(sorted(positions), positions)
+        self.assertIn("host actually exposes", selection)
+        self.assertIn("Re-evaluate", selection)
+        self.assertIn("visible delta, artifact, or risk changes", selection)
+        self.assertIn("Do not persist lens or tool selection", selection)
+        self.assertIn("central registry", selection)
+        self.assertIn("scoring database", selection)
+        self.assertIn("deterministic router", selection)
+
+    def test_capability_matching_uses_discoverable_host_descriptions(
+        self,
+    ) -> None:
+        selection = self.section_text(CORE, "Select the minimum host capability set")
+        for marker in (
+            "task or artifact triggers",
+            "expected output and check",
+            "non-use cases",
+            "authority and side-effect boundary",
+            "safe combinations",
+            "unsupported custom frontmatter",
+        ):
+            self.assertIn(marker, selection)
+
     def test_clarification_is_reserved_for_material_ambiguity(self) -> None:
         text = self.core_text()
         self.assertIn("Clarify only material ambiguity", text)

@@ -413,6 +413,12 @@ class AssurancePromptContractTests(unittest.TestCase):
         self.assertIn("explicitly requests a durable Assurance artifact", memory)
         self.assertNotIn("always write", memory)
 
+    def test_artifact_lens_never_activates_assurance_implicitly(self) -> None:
+        entry = self.section(ASSURANCE, "Entry")
+        self.assertIn("artifact lens", entry)
+        self.assertIn("does not activate Assurance", entry)
+        self.assertIn("Risk alone never activates it", entry)
+
     def test_verification_levels_are_exactly_five_and_cumulative(self) -> None:
         evidence = self.section(ASSURANCE, "Evidence levels")
         levels = (

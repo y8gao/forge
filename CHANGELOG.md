@@ -11,6 +11,10 @@ All notable changes to this project are documented in this file.
   plus a pinned experimental DeepSeek Harness bundle.
 - Added synchronized portable copies of all nine skills, package smoke checks,
   and tier-aware capability metadata without claiming profile equivalence.
+- Added one systems-informed Core reasoning kernel with Documentation,
+  Architecture, UI/UX, Code, and Testing artifact lenses.
+- Added per-delivery selection of the minimum sufficient host capabilities
+  without introducing fixed roles, a central registry, or a routing runtime.
 
 ### Fixed
 - Corrected the Codex installation instructions for the public Git marketplace.

@@ -16,6 +16,8 @@ second confirmation when the request and scope are clear.
 
 Forge may recommend Assurance for a risky surface, but a recommendation does
 not activate Assurance. Risk alone never activates it.
+Selecting an artifact lens or specialized capability also does not activate
+Assurance.
 
 ## Activation contract
 

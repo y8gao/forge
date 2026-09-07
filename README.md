@@ -18,6 +18,8 @@ current outcome, boundaries, progress, and next action.
   explicit opt-ins for work that needs iteration or stronger checking.
 - **Focused capabilities, not a simulated team.** Scout, Builder, and Checker
   are temporary task profiles rather than permanent roles or a fixed pipeline.
+- **Artifact-aware without a router.** One kernel applies five artifact lenses
+  and uses the minimum useful capabilities the current host actually exposes.
 - **Native profile parity on three hosts.** Claude Code, Codex, and Cursor use
   thin native packages with host-enforced Scout, Builder, and Checker wrappers.
 - **Portable Core on three more.** Command Code, Pi, and DeepSeek Harness load
@@ -29,8 +31,8 @@ current outcome, boundaries, progress, and next action.
 
 1. Ask the agent to initialize Forge; this creates a placeholder, not implementation authority.
 2. Describe the outcome in ordinary language to activate a validated Mission before work.
-3. Forge reads active intent, does the work directly, and records only meaningful
-   decisions, deliveries, pauses, completions, or Mission replacements.
+3. Forge reads active intent, selects artifact perspectives and host capabilities
+   for the current delivery, works directly, and records only real transitions.
 4. A later session reads the same two files and continues from the saved next action.
 
 Only the host agent writes active control memory. Commit, push, publish, deploy,
@@ -115,7 +117,8 @@ In Claude Code, Codex, Cursor, Command Code, Pi, or DeepSeek Harness, describe
 the outcome you want in ordinary language:
 
 - For ordinary work, Forge reads the saved project direction, restates the
-  outcome, and handles the task directly.
+  outcome, applies the relevant artifact lenses, and handles the task directly
+  with the minimum sufficient host capabilities.
 - For bounded continuation, ask Forge to continue for at most 3 iterations,
   showing each useful delta and stopping at the bound.
 - For an independent report-only check, ask for a fresh independent check with

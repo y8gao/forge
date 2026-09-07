@@ -75,26 +75,37 @@ or create a scheduler, daemon, ledger, policy engine, or runtime state machine.
 Each delivery cycle is:
 
 ```text
-Orient -> choose one user-inspectable visible delta -> Act or Delegate
-       -> targeted falsifying check -> lightweight economy check
+Orient -> choose one user-inspectable visible delta
+       -> select primary artifact lens and useful supporting lenses
+       -> select the minimum host capability set -> Act or Delegate
+       -> artifact-specific falsifying check -> lightweight economy check
        -> Host accepts -> one checkpoint -> continue or stop
 ```
 
 The host performs ordinary actions directly first. It may use Scout or Builder
-only when useful for a bounded discovery or implementation slice. The visible
-delta must advance the Mission: working behavior, an accepted decision, a
-reproducible diagnostic conclusion, a requested artifact, or a removed
-blocker. These do not count as delivery: reading files, launching agents,
+only when useful for a bounded discovery or implementation slice. For the
+current delta, apply Forge Core's reasoning kernel, choose one primary artifact
+lens plus only supporting lenses that change a design, action, or check, and
+select the minimum host capability set that can satisfy the boundary.
+Re-evaluate those choices when the delta, artifact, or risk changes; otherwise
+reuse them.
+
+The visible delta must advance the Mission: working behavior, an accepted
+decision, a reproducible diagnostic conclusion, a requested artifact, or a
+removed blocker. Choosing a lens, tool, Skill, or profile is not a visible
+delta. These do not count as delivery: reading files, launching agents,
 internal plans, and progress narration. Never manufacture an artifact to keep
 Loop running.
 
-Use targeted tests, lint, builds, inspection, or other falsifying evidence
-appropriate to the delta. Before acceptance, confirm criteria and risk coverage,
-then perform a lightweight economy check: were calls, files, dependencies,
-abstractions, wrappers, and configuration necessary, and could an existing
-repository, standard-library, native, or installed capability meet every
-criterion more simply? This is part of host acceptance, not another gate or
-artifact. Ordinary Loop verification does not automatically call Checker.
+Use a targeted falsifying check through tests, lint, builds, inspection, or
+other evidence appropriate to the delta. Before acceptance, confirm criteria
+and risk coverage, then perform a lightweight economy check: were calls, files,
+dependencies, abstractions, wrappers, and configuration necessary, and could an
+existing repository, standard-library, native, or installed capability meet
+every criterion more simply? This is part of host acceptance, not another gate
+or artifact. Ordinary Loop verification does not automatically call Checker,
+and lens or capability selection does not activate Assurance. It also cannot
+broaden external-effect authority.
 
 Only the host accepts results and writes active memory. One cycle produces at
 most one accepted visible delta and one checkpoint.

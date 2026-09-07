@@ -22,8 +22,8 @@ format: "forge-memory-v1"
 - Status: active
 
 ### D-003: Core is lightweight and optional capabilities are explicit
-- Decision: The host executes ordinary work directly in Core; Loop and Assurance require explicit user invocation, and temporary capability profiles are selected only when useful for the task.
-- Rationale: Delivery effort should scale with the task instead of simulating a permanent role organization or automatic gate pipeline.
+- Decision: The host executes ordinary work directly in Core, applies one systems-informed kernel through Documentation, Architecture, UI/UX, Code, and Testing lenses, and selects the minimum sufficient capabilities it actually exposes; Loop and Assurance remain explicit, and temporary profiles are used only when useful.
+- Rationale: Artifact-specific judgment and delivery effort should scale with the task without simulating permanent roles, fixed pipelines, a central capability registry, or a deterministic routing runtime.
 - Status: active
 
 ### D-004: Supported hosts share one thin product core

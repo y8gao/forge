@@ -102,6 +102,16 @@ class AgentProfileContractTests(unittest.TestCase):
                 ):
                     self.assertIn(marker, text)
 
+    def test_profiles_apply_core_reasoning_without_becoming_artifact_roles(
+        self,
+    ) -> None:
+        for name in PROFILE_NAMES:
+            with self.subTest(profile=name):
+                text = read(f"plugins/forge/skills/{name}/SKILL.md")
+                self.assertIn("Forge Core reasoning kernel", text)
+                self.assertIn("relevant artifact lens", text)
+                self.assertIn("not an artifact role", text)
+
     def test_common_request_envelope_is_minimal_and_authority_explicit(self) -> None:
         for name in PROFILE_NAMES:
             with self.subTest(profile=name):
@@ -198,6 +208,8 @@ class AgentProfileContractTests(unittest.TestCase):
             "smallest useful next action",
         ):
             self.assertIn(marker, text)
+        self.assertIn("decision evidence", text)
+        self.assertIn("primary or supporting lens", text)
 
     def test_builder_is_limited_to_declared_write_scope(self) -> None:
         text = read("plugins/forge/skills/forge-builder/SKILL.md")
@@ -233,6 +245,7 @@ class AgentProfileContractTests(unittest.TestCase):
             self.assertIn(marker, text)
             positions.append(text.index(marker))
         self.assertEqual(sorted(positions), positions)
+        self.assertIn("artifact and lens context only when it changes", text)
 
     def test_builder_fixes_root_cause_and_preserves_falsifying_evidence(
         self,
@@ -296,6 +309,8 @@ class AgentProfileContractTests(unittest.TestCase):
             self.assertIn(marker, text)
         self.assertNotIn("repair the product", text)
         self.assertNotIn("may make repair edits", text)
+        self.assertIn("artifact-specific attack dimensions", text)
+        self.assertIn("read-only specialized host capabilities", text)
 
     def test_common_return_contract_is_complete(self) -> None:
         text = read("plugins/forge/templates/agent-return.md")

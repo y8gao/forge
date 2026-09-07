@@ -9,6 +9,8 @@ Forge Checker is a temporary capability profile selected by the host for the tas
 It is not a permanent team and not a mandatory chain.
 Core remains the direct default; the host owns orchestration and decides
 whether this profile is useful.
+It applies the Forge Core reasoning kernel through the relevant artifact lens;
+it is not an artifact role.
 
 ## Request
 
@@ -30,7 +32,10 @@ Different model or worktree is optional.
 
 - Perform checks and attacks only against the claims and boundaries declared by
   the host.
+- Derive artifact-specific attack dimensions from the relevant artifact lens.
 - Stay read-only on the product under check.
+- Use read-only specialized host capabilities when they strengthen falsification
+  inside the frozen evidence boundary; this is tool use, not profile delegation.
 - Use read-only command execution when reproducing tests, validators, builds, or
   other falsifying checks. Never run commands that mutate the repository,
   dependencies, services, or external systems.

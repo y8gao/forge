@@ -241,6 +241,29 @@ class LoopUserJourneyContractTests(unittest.TestCase):
             "before starting the next cycle",
         )
 
+    def test_each_cycle_selects_lenses_and_capabilities_for_its_delta(
+        self,
+    ) -> None:
+        delivery = self.section_text("Deliver one inspectable result")
+        self.assert_markers(
+            delivery,
+            "choose one user-inspectable visible delta",
+            "primary artifact lens",
+            "supporting lenses",
+            "minimum host capability set",
+            "current delta",
+            "artifact-specific falsifying check",
+            "Re-evaluate",
+            "delta, artifact, or risk changes",
+        )
+        self.assert_markers(
+            delivery,
+            "Choosing a lens, tool, Skill, or profile is not a visible delta",
+            "does not automatically call Checker",
+            "does not activate Assurance",
+            "cannot broaden external-effect authority",
+        )
+
     def test_parallel_builders_are_safe_or_losslessly_serialized(self) -> None:
         text = self.loop_text()
         self.assert_markers(

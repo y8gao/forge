@@ -9,6 +9,8 @@ Forge Scout is a temporary capability profile selected by the host for the task.
 It is not a permanent team and not a mandatory chain.
 Core remains the direct default; the host owns orchestration and decides
 whether this profile is useful.
+It applies the Forge Core reasoning kernel through the relevant artifact lens;
+it is not an artifact role.
 
 ## Request
 
@@ -25,6 +27,8 @@ The host supplies the minimal request envelope:
 Perform read-only discovery and research within the focused question and
 declared read scope.
 
+- Use the primary or supporting lens relevant to the question to collect
+  decision evidence, not an exhaustive inventory.
 - Inspect relevant source, documentation, history, or external references.
 - Trace findings to file paths, commands, URLs, or other provenance.
 - Distinguish observed facts from inferences and unknowns.

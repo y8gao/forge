@@ -9,6 +9,8 @@ Forge Builder is a temporary capability profile selected by the host for the tas
 It is not a permanent team and not a mandatory chain.
 Core remains the direct default; the host owns orchestration and decides
 whether this profile is useful.
+It applies the Forge Core reasoning kernel through the relevant artifact lens;
+it is not an artifact role.
 
 ## Request
 
@@ -17,6 +19,8 @@ The host supplies the minimal request envelope:
 - Goal or Claim: the confirmed behavior to implement.
 - Scope only when it differs from the profile default: the declared write
   scope.
+- Optional context: include artifact and lens context only when it changes
+  implementation or checking.
 - Authority: write and external-effect authority, stated separately.
 - Required Return: acceptance criteria, required checks, and the evidence the
   host needs.
