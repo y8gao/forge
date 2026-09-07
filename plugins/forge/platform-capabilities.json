@@ -17,12 +17,26 @@
     {
       "id": "cursor",
       "status": "active-native"
+    },
+    {
+      "id": "command-code",
+      "status": "active-core"
+    },
+    {
+      "id": "pi",
+      "status": "active-core"
+    },
+    {
+      "id": "deepseek-harness",
+      "status": "active-core"
     }
   ],
   "platforms": [
     {
       "id": "claude-code",
       "delivery": "native",
+      "support_tier": "profile-equivalent",
+      "profile_equivalence": true,
       "manifest": "plugins/forge/.claude-plugin/plugin.json",
       "agents": "plugins/forge/agents",
       "profiles": [
@@ -34,6 +48,8 @@
     {
       "id": "codex",
       "delivery": "native",
+      "support_tier": "profile-equivalent",
+      "profile_equivalence": true,
       "manifest": "plugins/forge/.codex-plugin/plugin.json",
       "agents": "plugins/forge/agent-defs/codex",
       "profiles": [
@@ -45,6 +61,8 @@
     {
       "id": "cursor",
       "delivery": "native",
+      "support_tier": "profile-equivalent",
+      "profile_equivalence": true,
       "manifest": "plugins/forge/.cursor-plugin/plugin.json",
       "agents": "plugins/forge/agent-defs/cursor",
       "profiles": [
@@ -52,6 +70,30 @@
         "forge-builder",
         "forge-checker"
       ]
+    },
+    {
+      "id": "command-code",
+      "delivery": "agent-skills",
+      "support_tier": "core",
+      "profile_equivalence": false,
+      "manifest": ".agents/skills",
+      "profiles": []
+    },
+    {
+      "id": "pi",
+      "delivery": "pi-package",
+      "support_tier": "core",
+      "profile_equivalence": false,
+      "manifest": "package.json",
+      "profiles": []
+    },
+    {
+      "id": "deepseek-harness",
+      "delivery": "dsh-bundle",
+      "support_tier": "core",
+      "profile_equivalence": false,
+      "manifest": "packages/deepseek-harness/package.json",
+      "profiles": []
     }
   ]
 }

@@ -26,9 +26,9 @@ format: "forge-memory-v1"
 - Rationale: Delivery effort should scale with the task instead of simulating a permanent role organization or automatic gate pipeline.
 - Status: active
 
-### D-004: Three hosts share one thin product core
-- Decision: Claude Code, Codex, and Cursor ship as thin native packages over shared Memory-First semantics.
-- Rationale: Native host integration preserves portability without duplicating product behavior or introducing a long-running Forge runtime.
+### D-004: Supported hosts share one thin product core
+- Decision: Claude Code, Codex, and Cursor ship as profile-equivalent native packages; Command Code, Pi Coding Agent, and DeepSeek Harness receive the same Memory-First Core skills without a profile-equivalence guarantee.
+- Rationale: Host-native delivery preserves portability while capability claims remain limited to permission isolation each host can actually enforce.
 - Status: active
 
 ### D-005: Public product history starts from the current product
@@ -38,7 +38,7 @@ format: "forge-memory-v1"
 
 ## Constraints
 - Only the host agent writes active control memory.
-- Support Claude Code, Codex, and Cursor with shared semantics.
+- Support Claude Code, Codex, Cursor, Command Code, Pi Coding Agent, and DeepSeek Harness with shared Core semantics.
 - Keep each `SKILL.md` under 500 lines and Markdown templates parser-friendly.
 - Report targeted checks and evidence boundaries honestly.
 

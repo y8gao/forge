@@ -1,0 +1,183 @@
+#!/usr/bin/env python3
+"""Archive the active Forge mission, then replace it atomically."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+import re
+import stat
+import sys
+import tempfile
+
+
+LIB = Path(__file__).resolve().parents[1] / "lib"
+sys.path.insert(0, str(LIB))
+
+from forge_files import atomic_write, validate_managed_path  # noqa: E402
+from forge_memory import (  # noqa: E402
+    MemoryValidationError,
+    load_intent,
+    load_mission,
+)
+
+
+_WINDOWS_RESERVED_NAMES = {
+    "CON",
+    "PRN",
+    "AUX",
+    "NUL",
+    *(f"COM{number}" for number in range(1, 10)),
+    *(f"LPT{number}" for number in range(1, 10)),
+}
+
+
+class _ArgumentParser(argparse.ArgumentParser):
+    def error(self, message: str) -> None:
+        raise ValueError(message)
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = _ArgumentParser(prog="forge-compact", add_help=True)
+    parser.add_argument("project_root", metavar="PROJECT_ROOT")
+    operation = parser.add_mutually_exclusive_group(required=True)
+    operation.add_argument("--complete", action="store_true")
+    operation.add_argument("--replace-from", metavar="MISSION_FILE")
+    return parser
+
+
+def _error(message: str, *, code: int = 1) -> int:
+    print(f"forge-compact ERROR: {message}", file=sys.stderr)
+    return code
+
+
+def _safe_mission_id(value: str) -> str:
+    if (
+        not isinstance(value, str)
+        or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", value, re.ASCII)
+        or value in {".", ".."}
+        or value.endswith((".", " "))
+        or "/" in value
+        or "\\" in value
+        or Path(value).is_absolute()
+    ):
+        raise ValueError(f"unsafe mission ID: {value!r}")
+    if value.split(".", 1)[0].upper() in _WINDOWS_RESERVED_NAMES:
+        raise ValueError(f"unsafe mission ID: {value!r}")
+    return value
+
+
+def _managed_paths(project_root: Path, mission_id: str) -> dict[str, Path]:
+    forge = validate_managed_path(project_root, project_root / ".forge")
+    paths = {
+        "forge": forge,
+        "intent": forge / "INTENT.md",
+        "mission": forge / "MISSION.md",
+        "archive_root": forge / "archive",
+        "archive_dir": forge / "archive" / mission_id,
+        "archive": forge / "archive" / mission_id / "MISSION.final.md",
+    }
+    for name, path in paths.items():
+        if name != "forge":
+            paths[name] = validate_managed_path(forge, path)
+    return paths
+
+
+def main(arguments: list[str]) -> int:
+    try:
+        try:
+            options = _parser().parse_args(arguments)
+        except ValueError as error:
+            return _error(str(error) or "invalid arguments", code=2)
+
+        project_root = Path(options.project_root)
+        if project_root.name.lower() == ".forge":
+            raise ValueError("PROJECT_ROOT must not be a .forge directory")
+        if not project_root.is_dir():
+            raise ValueError(f"PROJECT_ROOT is not a directory: {project_root}")
+        project_root = validate_managed_path(project_root, project_root)
+
+        preliminary = _managed_paths(project_root, "pending")
+        forge = preliminary["forge"]
+        if not forge.is_dir():
+            raise ValueError(f"missing Forge directory: {forge}")
+        if not preliminary["archive_root"].is_dir():
+            raise ValueError(
+                f"missing archive directory: {preliminary['archive_root']}"
+            )
+
+        load_intent(preliminary["intent"])
+        mission = load_mission(preliminary["mission"])
+        active_bytes = preliminary["mission"].read_bytes()
+
+        if options.complete:
+            if mission.state != "done":
+                raise ValueError("--complete requires current MISSION state done")
+            target_mission_id = None
+            replacement_bytes = None
+        else:
+            replacement_path = Path(options.replace_from)
+            try:
+                replacement_bytes = replacement_path.read_bytes()
+            except OSError as error:
+                raise ValueError(
+                    f"cannot read replacement MISSION: {error}"
+                ) from None
+            with tempfile.TemporaryDirectory() as directory:
+                validation_path = Path(directory) / "MISSION.md"
+                validation_path.write_bytes(replacement_bytes)
+                replacement = load_mission(validation_path)
+            target_mission_id = _safe_mission_id(replacement.mission_id)
+            if replacement.state != "ready":
+                raise ValueError("replacement MISSION state must be ready")
+            if (
+                mission.mission_id == target_mission_id
+                and active_bytes == replacement_bytes
+            ):
+                print(f"forge-compact already active: {target_mission_id}")
+                return 0
+            if mission.mission_id == target_mission_id:
+                raise ValueError("replacement target matches active mission ID but content differs")
+
+        current_mission_id = _safe_mission_id(mission.mission_id)
+        paths = _managed_paths(project_root, current_mission_id)
+        archive_path = paths["archive"]
+        if archive_path.exists():
+            if not archive_path.is_file() or archive_path.read_bytes() != active_bytes:
+                raise ValueError(f"mission archive already exists: {archive_path}")
+        else:
+            paths["archive_dir"].mkdir(exist_ok=True)
+            archive_path = validate_managed_path(forge, archive_path)
+            atomic_write(
+                forge,
+                archive_path,
+                active_bytes,
+                mode=stat.S_IMODE(paths["mission"].stat().st_mode),
+            )
+
+        if replacement_bytes is not None:
+            try:
+                atomic_write(forge, paths["mission"], replacement_bytes)
+            except (OSError, ValueError) as error:
+                raise ValueError(
+                    f"{error}; archive is published at {archive_path}. "
+                    "Retry the same forge-compact command to recover."
+                ) from None
+    except (MemoryValidationError, OSError, UnicodeError, ValueError) as error:
+        return _error(str(error))
+
+    if target_mission_id is None:
+        print(
+            f"forge-compact archived {current_mission_id}; "
+            "active mission remains done"
+        )
+    else:
+        print(
+            f"forge-compact archived {current_mission_id} and activated "
+            f"{target_mission_id}"
+        )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

@@ -492,12 +492,43 @@ class ValidateContentMutationTests(unittest.TestCase):
         manifest.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
         self.assert_mutation_fails()
 
+    def test_portable_skill_payload_drift_fails(self) -> None:
+        for relative in (
+            ".agents/skills/forge-core/SKILL.md",
+            "packages/deepseek-harness/skills/forge-core/SKILL.md",
+        ):
+            with self.subTest(relative=relative):
+                path = self.repo / relative
+                original = path.read_text(encoding="utf-8")
+                try:
+                    path.write_text(original + "\nDrift.\n", encoding="utf-8")
+                    result = self.run_validator()
+                    self.assertNotEqual(0, result.returncode)
+                    self.assertIn(
+                        "portable skill payload is out of sync",
+                        result.stdout,
+                    )
+                finally:
+                    path.write_text(original, encoding="utf-8")
+
+    def test_portable_helper_source_drift_fails(self) -> None:
+        source = self.repo / "plugins/forge/scripts/forge-status"
+        original = source.read_text(encoding="utf-8")
+        source.write_text(original + "\n# Drift.\n", encoding="utf-8")
+
+        result = self.run_validator()
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("portable helper asset is out of sync", result.stdout)
+
     def test_nonzero_version_without_changelog_entry_fails(self) -> None:
         (self.repo / "VERSION").write_text("9.9.8\n", encoding="utf-8")
         for relative in (
             "plugins/forge/.claude-plugin/plugin.json",
             "plugins/forge/.codex-plugin/plugin.json",
             "plugins/forge/.cursor-plugin/plugin.json",
+            "package.json",
+            "packages/deepseek-harness/package.json",
         ):
             manifest = self.repo / relative
             data = json.loads(manifest.read_text(encoding="utf-8"))

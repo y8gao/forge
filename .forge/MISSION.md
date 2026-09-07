@@ -1,40 +1,40 @@
 ---
 format: "forge-memory-v1"
-mission_id: "ci-release-platform-boundary"
+mission_id: "three-host-core-support"
 state: "done"
-checkpointed_at: "2026-09-05T10:38:42Z"
+checkpointed_at: "2026-09-07T01:48:20Z"
 ---
 # Current Mission
 
 ## Outcome
-- Statement: Run executable `release.sh` workflow tests on Linux while retaining Windows validation for the cross-platform Python product surface.
+- Statement: Add Core-level Forge delivery for Command Code, Pi Coding Agent, and DeepSeek Harness through each host's official package mechanism.
 
 ## Scope
-- In: Encode the POSIX-only release execution boundary, keep static release checks cross-platform, synchronize both repositories, verify, commit, push, and inspect CI.
-- Out: Change release semantics, install WSL, remove the Windows matrix, or modify host compatibility jobs.
-- Constraints: Keep Linux coverage for every release workflow case and Windows coverage for the remaining Python product surface.
+- In: Portable Agent Skills payload, Command Code skill installation, Pi package metadata, experimental DeepSeek Harness bundle, tier-aware capability metadata, release synchronization, CI smoke checks, and public documentation.
+- Out: Full Scout/Builder/Checker permission-profile equivalence on the three new hosts, publishing packages, committing, or pushing.
+- Constraints: Preserve Claude Code, Codex, and Cursor behavior; keep every `SKILL.md` under 500 lines; pin PR compatibility checks and report experimental boundaries honestly.
 
 ## Success Criteria
-- [x] A regression test encodes that executable `release.sh` workflow cases are POSIX-only.
-- [x] Linux continues to run every release workflow case through the full suite.
-- [x] Windows continues to validate static release contracts and the cross-platform Python product surface.
-- [x] Both repositories retain synchronized workflows and regression tests.
-- [x] Local checks pass and the fix is committed and pushed to both `main` branches.
-- [x] The resulting public Core CI run is inspected and its exact status reported.
+- [x] All nine Forge skills are installable through a synchronized portable Agent Skills payload.
+- [x] Command Code and Pi use their documented skill/package discovery mechanisms.
+- [x] DeepSeek Harness has a pinned experimental DSH bundle that registers all nine skills with resource bases.
+- [x] Capability metadata and documentation distinguish profile-equivalent native hosts from Core-level hosts.
+- [x] Release tooling synchronizes all versioned package manifests without weakening its receipt boundary.
+- [x] Targeted package checks and the full local test suite pass.
 
 ## Latest Delivery
-- Published the POSIX-only release execution boundary while preserving Windows product coverage; corrected Core CI passed in both repositories.
+- Implemented and verified portable Core support for Command Code, Pi Coding Agent, and DeepSeek Harness; user authorized committing the completed branch.
 
 ## Next Action
-- Address the Node.js 20 deprecation annotations by updating pinned GitHub Actions in a separate maintenance change.
+- Push the committed feature branch only if explicitly requested.
 
 ## Blockers
 - None.
 
 ## Last Check
-- Ran: Public Core CI run 33961133482 PASS: Ubuntu Python 3.11/3.14, Windows Python 3.11/3.14, Claude install, and Codex install all succeeded; private run 33961129864 also PASS.
-- Boundary: CI-verified for the corrected test boundary; GitHub reports non-blocking Node.js 20 deprecation annotations for the pinned Actions.
+- Ran: Pre-commit full suite: 286 tests passed with 12 expected Windows POSIX skips; content, memory, sync, and diff checks passed.
+- Boundary: Locally verified on Windows; Command Code and DeepSeek live installation remain CI-only until the branch is pushed and CI runs.
 
 ## Resume
 - Read: `.forge/INTENT.md` and `.forge/MISSION.md` only.
-- Do: Address the Node.js 20 deprecation annotations by updating pinned GitHub Actions in a separate maintenance change.
+- Do: Push the committed feature branch only if explicitly requested.

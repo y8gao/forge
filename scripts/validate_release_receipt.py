@@ -16,6 +16,8 @@ CANONICAL_ALLOWLIST = [
     "plugins/forge/.codex-plugin/plugin.json",
     "plugins/forge/.claude-plugin/plugin.json",
     "plugins/forge/.cursor-plugin/plugin.json",
+    "package.json",
+    "packages/deepseek-harness/package.json",
 ]
 CANONICAL_VALIDATION = {
     "content": "passed",

@@ -8,9 +8,11 @@ VERSION_FILE="$REPO_ROOT/VERSION"
 CODEX_MANIFEST="$REPO_ROOT/plugins/forge/.codex-plugin/plugin.json"
 CLAUDE_MANIFEST="$REPO_ROOT/plugins/forge/.claude-plugin/plugin.json"
 CURSOR_MANIFEST="$REPO_ROOT/plugins/forge/.cursor-plugin/plugin.json"
+PI_MANIFEST="$REPO_ROOT/package.json"
+DSH_MANIFEST="$REPO_ROOT/packages/deepseek-harness/package.json"
 RECEIPT="$REPO_ROOT/.git/forge-release-receipt.json"
 RECEIPT_SEAL="$REPO_ROOT/.git/forge-release-receipt.sha256"
-ALLOWLIST=("VERSION" "plugins/forge/.codex-plugin/plugin.json" "plugins/forge/.claude-plugin/plugin.json" "plugins/forge/.cursor-plugin/plugin.json")
+ALLOWLIST=("VERSION" "plugins/forge/.codex-plugin/plugin.json" "plugins/forge/.claude-plugin/plugin.json" "plugins/forge/.cursor-plugin/plugin.json" "package.json" "packages/deepseek-harness/package.json")
 
 usage() {
   echo "usage: $0 prepare <version> | commit <version> --authorized" >&2
@@ -64,7 +66,7 @@ run_required_checks() {
   fi
   python3 scripts/validate-content.py || return 1
   python3 plugins/forge/scripts/forge-memory-validate . || return 1
-  python3 -m unittest tests.test_platform_agents tests.test_cursor_package tests.test_agent_profiles tests.test_product_scope tests.test_validate_content tests.test_release_receipt || return 1
+  python3 -m unittest tests.test_platform_agents tests.test_cursor_package tests.test_portable_hosts tests.test_agent_profiles tests.test_product_scope tests.test_validate_content tests.test_release_receipt || return 1
   FORGE_RELEASE_TESTING=1 python3 -m unittest tests.test_release || return 1
   bash -n scripts/release.sh || return 1
   if command -v claude >/dev/null 2>&1; then
@@ -80,7 +82,7 @@ run_required_checks() {
 
 write_versions() {
   printf '%s\n' "$TARGET_VERSION" > "$VERSION_FILE"
-  python3 - "$TARGET_VERSION" "$CODEX_MANIFEST" "$CLAUDE_MANIFEST" "$CURSOR_MANIFEST" <<'PY'
+  python3 - "$TARGET_VERSION" "$CODEX_MANIFEST" "$CLAUDE_MANIFEST" "$CURSOR_MANIFEST" "$PI_MANIFEST" "$DSH_MANIFEST" <<'PY'
 import json,sys
 version = sys.argv[1]
 for name in sys.argv[2:]:
@@ -169,7 +171,7 @@ with open(receipt, 'w', encoding='utf-8') as handle:
     handle.write('\n')
 PY
   sha256_file "$RECEIPT" > "$RECEIPT_SEAL"
-    echo "release: prepared $TARGET_VERSION; review the four-file diff, then run:"
+    echo "release: prepared $TARGET_VERSION; review the six-file diff, then run:"
     echo "  $0 commit $TARGET_VERSION --authorized"
     ;;
 

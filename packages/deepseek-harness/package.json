@@ -1,0 +1,32 @@
+{
+  "name": "forge-memory-first-dsh",
+  "version": "0.1.0",
+  "description": "Experimental Forge Memory-First skill bundle for DeepSeek Harness",
+  "license": "MIT",
+  "type": "module",
+  "main": "./index.js",
+  "files": [
+    "index.js",
+    "cordis.patch.yml",
+    "skills"
+  ],
+  "keywords": [
+    "agent-skills",
+    "deepseek-harness",
+    "dsh-bundle",
+    "experimental"
+  ],
+  "engines": {
+    "node": ">=22.19.0",
+    "dsh": "0.1.2-rc.1"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "4.0.2",
+    "@deepseek-ai/dsh-skill": "0.1.2-rc.1"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

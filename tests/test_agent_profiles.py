@@ -367,6 +367,9 @@ class AgentProfileContractTests(unittest.TestCase):
                 {"id": "claude-code", "status": "active-native"},
                 {"id": "codex", "status": "active-native"},
                 {"id": "cursor", "status": "active-native"},
+                {"id": "command-code", "status": "active-core"},
+                {"id": "pi", "status": "active-core"},
+                {"id": "deepseek-harness", "status": "active-core"},
             ],
             capability["host_adapters"],
         )
@@ -381,10 +384,27 @@ class AgentProfileContractTests(unittest.TestCase):
         platforms = {
             entry["id"]: entry for entry in capability["platforms"]
         }
-        self.assertEqual({"claude-code", "codex", "cursor"}, set(platforms))
-        for entry in platforms.values():
+        self.assertEqual(
+            {
+                "claude-code",
+                "codex",
+                "cursor",
+                "command-code",
+                "pi",
+                "deepseek-harness",
+            },
+            set(platforms),
+        )
+        for host in ("claude-code", "codex", "cursor"):
+            entry = platforms[host]
             self.assertEqual(sorted(PROFILE_NAMES), sorted(entry["profiles"]))
             self.assertEqual("native", entry["delivery"])
+            self.assertTrue(entry["profile_equivalence"])
+            self.assertNotIn("roles", entry)
+        for host in ("command-code", "pi", "deepseek-harness"):
+            entry = platforms[host]
+            self.assertEqual([], entry["profiles"])
+            self.assertFalse(entry["profile_equivalence"])
             self.assertNotIn("roles", entry)
 
 
