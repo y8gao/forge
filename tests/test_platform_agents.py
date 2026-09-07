@@ -119,6 +119,19 @@ class PlatformAgentPackagingTests(unittest.TestCase):
                 for block in job_env_blocks:
                     self.assertNotIn("${{ runner.", block)
 
+    def test_dsh_jobs_install_pnpm_before_managing_plugins(self) -> None:
+        for name in ("ci.yml", "host-compatibility.yml"):
+            with self.subTest(workflow=name):
+                workflow = (ROOT / ".github/workflows" / name).read_text(
+                    encoding="utf-8"
+                )
+                pnpm_install = "npm install --global pnpm@10.17.1"
+                self.assertIn(pnpm_install, workflow)
+                self.assertLess(
+                    workflow.index(pnpm_install),
+                    workflow.index("dsh plugin --profile"),
+                )
+
     def test_readme_documents_ci_host_coverage_boundary(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         validation = readme.split("## Validate\n", 1)[1].split(

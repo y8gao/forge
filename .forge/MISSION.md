@@ -2,7 +2,7 @@
 format: "forge-memory-v1"
 mission_id: "fix-new-host-ci"
 state: "working"
-checkpointed_at: "2026-09-07T02:09:01Z"
+checkpointed_at: "2026-09-07T02:14:12Z"
 ---
 # Current Mission
 
@@ -21,18 +21,18 @@ checkpointed_at: "2026-09-07T02:09:01Z"
 - [ ] The fix is covered by regression tests and pushed to the feature branch.
 
 ## Latest Delivery
-- User authorized committing and pushing the locally verified CI repair.
+- GitHub created all intended jobs; every job passed except the two DSH local-bundle jobs, whose logs showed pnpm missing. Added pinned pnpm setup and regression coverage.
 
 ## Next Action
-- Commit and push the CI repair, then inspect Core CI and manually dispatch Host Compatibility.
+- Commit and push the pnpm fix, then rerun both workflows.
 
 ## Blockers
 - None.
 
 ## Last Check
-- Ran: actionlint 1.7.7 passed both workflows; 287 tests passed with 12 expected Windows skips; content, memory, portable-sync, and diff checks passed.
-- Boundary: Locally verified on Windows; real GitHub-hosted jobs remain pending until push.
+- Ran: 13 platform tests passed; actionlint 1.7.7 passed both workflows; git diff --check passed.
+- Boundary: DSH repair is locally verified but has not yet run on GitHub.
 
 ## Resume
 - Read: `.forge/INTENT.md` and `.forge/MISSION.md` only.
-- Do: Commit and push the CI repair, then inspect Core CI and manually dispatch Host Compatibility.
+- Do: Commit and push the pnpm fix, then rerun both workflows.
