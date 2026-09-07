@@ -1,8 +1,8 @@
 ---
 format: "forge-memory-v1"
 mission_id: "fix-new-host-ci"
-state: "working"
-checkpointed_at: "2026-09-07T02:14:12Z"
+state: "done"
+checkpointed_at: "2026-09-07T02:16:36Z"
 ---
 # Current Mission
 
@@ -15,24 +15,24 @@ checkpointed_at: "2026-09-07T02:14:12Z"
 - Constraints: Preserve least-privilege permissions, pinned PR gates, latest-version monitoring, and honest verification boundaries.
 
 ## Success Criteria
-- [ ] Both workflow files pass GitHub-aware semantic validation.
-- [ ] Core CI creates jobs and all required checks pass.
-- [ ] Host Compatibility creates the intended scheduled/manual jobs without running on ordinary pushes.
-- [ ] The fix is covered by regression tests and pushed to the feature branch.
+- [x] Both workflow files pass GitHub-aware semantic validation.
+- [x] Core CI creates jobs and all required checks pass.
+- [x] Host Compatibility creates the intended scheduled/manual jobs without running on ordinary pushes.
+- [x] The fix is covered by regression tests and pushed to the feature branch.
 
 ## Latest Delivery
-- GitHub created all intended jobs; every job passed except the two DSH local-bundle jobs, whose logs showed pnpm missing. Added pinned pnpm setup and regression coverage.
+- Repaired GitHub Actions workflow validation and DSH plugin setup; both Core CI and Host Compatibility now pass on commit a2777d5.
 
 ## Next Action
-- Commit and push the pnpm fix, then rerun both workflows.
+- Await the next user-requested mission.
 
 ## Blockers
 - None.
 
 ## Last Check
-- Ran: 13 platform tests passed; actionlint 1.7.7 passed both workflows; git diff --check passed.
-- Boundary: DSH repair is locally verified but has not yet run on GitHub.
+- Ran: Core CI run 34075661427 passed all 9 jobs; Host Compatibility run 34075668672 passed all 9 jobs; local suite passed 287 tests with 12 expected Windows skips.
+- Boundary: CI-verified for workflow parsing and all configured host install checks; no package publication was performed.
 
 ## Resume
 - Read: `.forge/INTENT.md` and `.forge/MISSION.md` only.
-- Do: Commit and push the pnpm fix, then rerun both workflows.
+- Do: Await the next user-requested mission.
