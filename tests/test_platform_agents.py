@@ -106,6 +106,19 @@ class PlatformAgentPackagingTests(unittest.TestCase):
         self.assertNotIn("OPENAI_API_KEY", workflow)
         self.assertNotRegex(workflow, r"actions/(?:checkout|setup-node)@v\d")
 
+    def test_job_environment_does_not_use_runner_context(self) -> None:
+        for name in ("ci.yml", "host-compatibility.yml"):
+            with self.subTest(workflow=name):
+                workflow = (ROOT / ".github/workflows" / name).read_text(
+                    encoding="utf-8"
+                )
+                job_env_blocks = re.findall(
+                    r"(?m)^    env:\n((?:      .*(?:\n|$))*)",
+                    workflow,
+                )
+                for block in job_env_blocks:
+                    self.assertNotIn("${{ runner.", block)
+
     def test_readme_documents_ci_host_coverage_boundary(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         validation = readme.split("## Validate\n", 1)[1].split(

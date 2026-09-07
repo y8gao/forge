@@ -102,8 +102,6 @@ jobs:
     name: DeepSeek Harness latest / local experimental bundle
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      DSH_HOME: ${{ runner.temp }}/dsh-local-home
     steps:
       - name: Check out repository
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -114,6 +112,8 @@ jobs:
       - name: Install latest DeepSeek Harness CLI
         run: npm install --global @deepseek-ai/dsh@latest
       - name: Install and compose local bundle
+        env:
+          DSH_HOME: ${{ runner.temp }}/dsh-local-home
         run: |
           dsh plugin --profile forge-smoke add "$GITHUB_WORKSPACE/packages/deepseek-harness"
           dsh --profile forge-smoke --dump-config

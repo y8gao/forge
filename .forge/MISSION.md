@@ -1,40 +1,38 @@
 ---
 format: "forge-memory-v1"
-mission_id: "three-host-core-support"
-state: "done"
-checkpointed_at: "2026-09-07T01:48:20Z"
+mission_id: "fix-new-host-ci"
+state: "working"
+checkpointed_at: "2026-09-07T02:09:01Z"
 ---
 # Current Mission
 
 ## Outcome
-- Statement: Add Core-level Forge delivery for Command Code, Pi Coding Agent, and DeepSeek Harness through each host's official package mechanism.
+- Statement: Fix the GitHub Actions failures introduced by the new coding-agent host support.
 
 ## Scope
-- In: Portable Agent Skills payload, Command Code skill installation, Pi package metadata, experimental DeepSeek Harness bundle, tier-aware capability metadata, release synchronization, CI smoke checks, and public documentation.
-- Out: Full Scout/Builder/Checker permission-profile equivalence on the three new hosts, publishing packages, committing, or pushing.
-- Constraints: Preserve Claude Code, Codex, and Cursor behavior; keep every `SKILL.md` under 500 lines; pin PR compatibility checks and report experimental boundaries honestly.
+- In: Diagnose workflow validation and host installation failures, add regression coverage, fix workflows, verify locally, commit, push, and inspect resulting CI.
+- Out: Change host support tiers, publish npm packages, or add unrelated maintenance.
+- Constraints: Preserve least-privilege permissions, pinned PR gates, latest-version monitoring, and honest verification boundaries.
 
 ## Success Criteria
-- [x] All nine Forge skills are installable through a synchronized portable Agent Skills payload.
-- [x] Command Code and Pi use their documented skill/package discovery mechanisms.
-- [x] DeepSeek Harness has a pinned experimental DSH bundle that registers all nine skills with resource bases.
-- [x] Capability metadata and documentation distinguish profile-equivalent native hosts from Core-level hosts.
-- [x] Release tooling synchronizes all versioned package manifests without weakening its receipt boundary.
-- [x] Targeted package checks and the full local test suite pass.
+- [ ] Both workflow files pass GitHub-aware semantic validation.
+- [ ] Core CI creates jobs and all required checks pass.
+- [ ] Host Compatibility creates the intended scheduled/manual jobs without running on ordinary pushes.
+- [ ] The fix is covered by regression tests and pushed to the feature branch.
 
 ## Latest Delivery
-- Implemented and verified portable Core support for Command Code, Pi Coding Agent, and DeepSeek Harness; user authorized committing the completed branch.
+- User authorized committing and pushing the locally verified CI repair.
 
 ## Next Action
-- Push the committed feature branch only if explicitly requested.
+- Commit and push the CI repair, then inspect Core CI and manually dispatch Host Compatibility.
 
 ## Blockers
 - None.
 
 ## Last Check
-- Ran: Pre-commit full suite: 286 tests passed with 12 expected Windows POSIX skips; content, memory, sync, and diff checks passed.
-- Boundary: Locally verified on Windows; Command Code and DeepSeek live installation remain CI-only until the branch is pushed and CI runs.
+- Ran: actionlint 1.7.7 passed both workflows; 287 tests passed with 12 expected Windows skips; content, memory, portable-sync, and diff checks passed.
+- Boundary: Locally verified on Windows; real GitHub-hosted jobs remain pending until push.
 
 ## Resume
 - Read: `.forge/INTENT.md` and `.forge/MISSION.md` only.
-- Do: Push the committed feature branch only if explicitly requested.
+- Do: Commit and push the CI repair, then inspect Core CI and manually dispatch Host Compatibility.
