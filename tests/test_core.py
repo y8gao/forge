@@ -113,6 +113,23 @@ class CoreUserJourneyContractTests(unittest.TestCase):
         ):
             self.assertIn(marker, text)
 
+    def test_initial_mission_is_activated_before_substantive_work(self) -> None:
+        core = self.core_text()
+        memory = self.memory_text()
+        for marker in (
+            '`mission_id: "initial"`',
+            "treat that request as confirmation",
+            "before substantive implementation",
+            "Do not classify substantive first-project work as incidental",
+        ):
+            self.assertIn(marker, core)
+        for marker in (
+            "publish and validate a real `ready` Mission",
+            "`forge-compact --replace-from`",
+            "Only then may substantive implementation begin",
+        ):
+            self.assertIn(marker, memory)
+
     def test_completion_uses_exact_state_tokens_and_post_write_validation(
         self,
     ) -> None:
@@ -239,6 +256,7 @@ class CoreUserJourneyContractTests(unittest.TestCase):
     def test_memory_checkpoints_only_real_transitions(self) -> None:
         text = self.memory_text()
         self.assertIn("Checkpoint only a real transition", text)
+        self.assertIn("A checkpoint is mandatory when a real transition occurs", text)
         self.assertIn("pure question", text)
         self.assertIn("read-only lookup", text)
 

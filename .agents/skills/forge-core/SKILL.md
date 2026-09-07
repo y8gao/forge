@@ -45,6 +45,12 @@ On a fresh resume, state controls what is safe:
 - `blocked` requires resolving or revising the blocker first.
 - `done` stays closed unless the user confirms a new Mission.
 
+If MISSION still has `mission_id: "initial"` and a concrete user request
+supplies the Outcome, Scope, and Success Criteria, treat that request as
+confirmation; before substantive implementation, map that confirmed boundary
+into a real `ready` Mission, publish it through the safe replacement path, and
+validate it. Do not classify substantive first-project work as incidental.
+
 ## Keep unrelated work separate
 
 A pure question or read-only lookup does not replace or checkpoint the active

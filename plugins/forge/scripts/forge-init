@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 
 
+sys.dont_write_bytecode = True
 LIB = Path(__file__).resolve().parents[1] / "lib"
 sys.path.insert(0, str(LIB))
 
@@ -18,14 +19,19 @@ from forge_memory import (
 
 BEGIN_MARKER = "<!-- BEGIN FORGE MEMORY-FIRST -->"
 END_MARKER = "<!-- END FORGE MEMORY-FIRST -->"
-BRIDGE = f"""\
-{BEGIN_MARKER}
-## Forge Memory-First
-When entering this project, read `.forge/INTENT.md` and `.forge/MISSION.md`.
-Work around the current outcome and next action.
-Update active memory only at checkpoint transitions.
-{END_MARKER}
-"""
+BRIDGE = (
+    f"{BEGIN_MARKER}\n"
+    "## Forge Memory-First\n"
+    "Read `.forge/INTENT.md` and `.forge/MISSION.md` on entry and follow the "
+    "current outcome and next action.\n"
+    "Before substantive implementation, ensure MISSION fits the confirmed "
+    'request; if it has `mission_id: "initial"`, activate a real Mission first.\n'
+    "Run `forge-memory-validate` after every active-memory write.\n"
+    "Checkpoint user decisions, accepted visible delivery, pause, completion, "
+    "or Mission replacement.\n"
+    "Do not checkpoint reads, edits, tests, or narration.\n"
+    f"{END_MARKER}"
+)
 
 
 def _error(message: str, *, code: int = 2) -> int:
@@ -50,17 +56,29 @@ def _validate_bridge(path: Path) -> bytes | None:
 
 def _append_bridge(project_root: Path, path: Path) -> None:
     content = _validate_bridge(path)
+    desired = BRIDGE.encode("utf-8")
     if content is not None:
-        if BEGIN_MARKER.encode("utf-8") in content:
+        begin = BEGIN_MARKER.encode("utf-8")
+        end = END_MARKER.encode("utf-8")
+        if begin in content:
+            start = content.index(begin)
+            stop = content.index(end, start) + len(end)
+            if content[start:stop] == desired:
+                return
+            atomic_write(
+                project_root,
+                path,
+                content[:start] + desired + content[stop:],
+            )
             return
         separator = b"\n\n" if content and not content.endswith(b"\n") else b"\n"
         atomic_write(
             project_root,
             path,
-            content + separator + BRIDGE.encode("utf-8"),
+            content + separator + desired,
         )
         return
-    atomic_write(project_root, path, BRIDGE.encode("utf-8"))
+    atomic_write(project_root, path, desired)
 
 
 def main(arguments: list[str]) -> int:
@@ -116,10 +134,13 @@ def main(arguments: list[str]) -> int:
             )
         _append_bridge(project_root, agents)
         _append_bridge(project_root, claude)
+        active_mission = load_mission(mission)
     except (OSError, UnicodeError, ValueError) as error:
         return _error(str(error), code=1)
 
     print(f"forge-init initialized {project_root}")
+    if active_mission.mission_id == "initial":
+        print("forge-init NEXT: activate the placeholder Mission before substantive work")
     return 0
 
 

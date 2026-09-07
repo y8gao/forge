@@ -21,6 +21,9 @@ from forge_memory import render_initial_intent, render_initial_mission  # noqa: 
 EXPECTED_FORGE_ENTRIES = {"INTENT.md", "MISSION.md", "archive"}
 BEGIN_MARKER = "<!-- BEGIN FORGE MEMORY-FIRST -->"
 END_MARKER = "<!-- END FORGE MEMORY-FIRST -->"
+ACTIVATION_NOTICE = (
+    "forge-init NEXT: activate the placeholder Mission before substantive work"
+)
 
 
 class ForgeInitTests(unittest.TestCase):
@@ -73,7 +76,10 @@ class ForgeInitTests(unittest.TestCase):
         result = self.run_init(str(self.project))
 
         self.assertEqual(0, result.returncode, result.stderr)
-        self.assertEqual(f"forge-init initialized {self.project}\n", result.stdout)
+        self.assertEqual(
+            f"forge-init initialized {self.project}\n{ACTIVATION_NOTICE}\n",
+            result.stdout,
+        )
         self.assertEqual("", result.stderr)
         forge = self.project / ".forge"
         self.assertEqual(EXPECTED_FORGE_ENTRIES, {path.name for path in forge.iterdir()})
@@ -94,7 +100,11 @@ class ForgeInitTests(unittest.TestCase):
             self.assertIn(".forge/MISSION.md", text)
             self.assertIn("outcome", text.lower())
             self.assertIn("next action", text.lower())
-            self.assertIn("checkpoint transitions", text.lower())
+            self.assertIn("before substantive implementation", text.lower())
+            self.assertIn('mission_id: "initial"', text)
+            self.assertIn("accepted visible delivery", text.lower())
+            self.assertIn("forge-memory-validate", text)
+            self.assertIn("do not checkpoint reads, edits, tests, or narration", text.lower())
             for legacy in ("thin protocol", "preflight", "reviewer", "gate"):
                 self.assertNotIn(legacy, text.lower())
 
@@ -209,6 +219,28 @@ class ForgeInitTests(unittest.TestCase):
 
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertTrue(agents.read_bytes().startswith(existing))
+
+    def test_rerun_refreshes_only_managed_bridge_content(self):
+        prefix = b"user rules\r\n\r\n"
+        suffix = b"\r\n\r\nuser footer\r\n"
+        old_bridge = (
+            f"{BEGIN_MARKER}\n"
+            "## Forge Memory-First\n"
+            "Update active memory only at checkpoint transitions.\n"
+            f"{END_MARKER}"
+        ).encode("utf-8")
+        agents = self.project / "AGENTS.md"
+        agents.write_bytes(prefix + old_bridge + suffix)
+
+        result = self.run_init(str(self.project))
+
+        self.assertEqual(0, result.returncode, result.stderr)
+        refreshed = agents.read_bytes()
+        self.assertTrue(refreshed.startswith(prefix))
+        self.assertTrue(refreshed.endswith(suffix))
+        self.assertNotIn(old_bridge, refreshed)
+        self.assertIn(b"Before substantive implementation", refreshed)
+        self.assertIn(b"forge-memory-validate", refreshed)
 
     def test_rejects_forge_directory_symlink_without_external_mutation(self):
         external = self.project.parent / "external-forge"

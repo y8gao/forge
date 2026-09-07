@@ -74,6 +74,10 @@ Checkpoint only a real transition:
 4. the active mission completes;
 5. the active mission is replaced.
 
+A checkpoint is mandatory when a real transition occurs. The five triggers
+above are the complete trigger model; this does not create checkpoints for
+individual reads, edits, tests, tool calls, or narration.
+
 A pure question or read-only lookup is not a transition. Incidental work such
 as a single-turn, reversible change must not be written into an unrelated
 Mission. Do not checkpoint each tool call, edit, test, or internal step. Use
@@ -98,6 +102,12 @@ Changing user-confirmed Scope or Success Criteria requires a direct validated
 host rewrite through the shared safe-write semantics. The host validates the
 complete Mission before publishing it; do not invent a separate script or
 extend forge-checkpoint to bypass its narrow mutation contract.
+
+For initial activation, map the confirmed request into Outcome, Scope, and
+Success Criteria; render a complete, non-placeholder `ready` MISSION; publish
+it safely through the replacement MISSION file path; and run
+`forge-memory-validate`. This must publish and validate a real `ready` Mission.
+Only then may substantive implementation begin.
 
 ## Compact and archive
 

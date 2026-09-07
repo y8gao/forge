@@ -44,6 +44,13 @@ If the entry request is incomplete, ask only for missing material facts. Do not
 repeat facts the user already supplied. Then show the completed card exactly
 once and start only when the user explicitly replies to approve it.
 
+Before the first delivery cycle, ensure the active MISSION expresses the
+accepted Loop card. If it has `mission_id: "initial"` or its acceptance boundary
+does not match, activate or replace MISSION through the safe publication path.
+Whether MISSION is reused or replaced, run `forge-memory-validate`. Until that
+validation passes, the host must not modify product files. A matching MISSION
+does not require a redundant checkpoint write.
+
 If the user declines Loop, that is not cancelling the original task. Continue
 under the authority already granted with at most one minimum safe Core delivery,
 a plan-only response when requested, or an explicit stop. Report remaining
@@ -92,6 +99,10 @@ artifact. Ordinary Loop verification does not automatically call Checker.
 Only the host accepts results and writes active memory. One cycle produces at
 most one accepted visible delta and one checkpoint.
 
+After an accepted visible delta, the host must checkpoint and validate it
+before starting the next cycle. If that delta also ends the invocation, use the
+single stop checkpoint below rather than writing a second checkpoint.
+
 ## Delegate without collisions
 
 Parallel delegation is allowed only when tasks are independent and do not share
@@ -131,6 +142,11 @@ Every stop reports the reason, accepted deliveries, checks actually run,
 remaining work, and evidence boundary. Write an accepted visible delta and stop
 in one checkpoint; never split one transition into two active-memory writes. A
 no-delta stop records no fabricated Latest Delivery.
+
+Before returning the final Loop result, checkpoint the mapped canonical stop
+state and validate that checkpoint. Reuse the combined checkpoint when an
+accepted visible delta and stop occur together; a no-delta stop updates only
+truthful continuity fields and never fabricates a delivery.
 
 After the first failed cycle, persist the classified root cause, key evidence,
 and attempted recovery in existing Last Check or Blockers. This compact fact,
