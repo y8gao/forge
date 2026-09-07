@@ -164,6 +164,19 @@ class LoopUserJourneyContractTests(unittest.TestCase):
             "ask for confirmation again",
         )
 
+    def test_entry_activates_matching_mission_before_first_cycle(self) -> None:
+        entry = self.section_text("Confirm entry")
+        self.assert_markers(
+            entry,
+            "Before the first delivery cycle",
+            "active MISSION expresses the accepted Loop",
+            '`mission_id: "initial"`',
+            "activate or replace MISSION",
+            "Whether MISSION is reused or replaced",
+            "`forge-memory-validate`",
+            "must not modify product files",
+        )
+
     def test_user_gets_one_complete_loop_card_without_guessed_scope(self) -> None:
         text = self.loop_text()
         for field in ("Outcome:", "Done when:", "Boundaries:", "Budget:"):
@@ -221,6 +234,12 @@ class LoopUserJourneyContractTests(unittest.TestCase):
             "do not count as delivery",
             "does not automatically call Checker",
         )
+        delivery = self.section_text("Deliver one inspectable result")
+        self.assert_markers(
+            delivery,
+            "must checkpoint and validate",
+            "before starting the next cycle",
+        )
 
     def test_parallel_builders_are_safe_or_losslessly_serialized(self) -> None:
         text = self.loop_text()
@@ -258,6 +277,8 @@ class LoopUserJourneyContractTests(unittest.TestCase):
         )
         stop = self.section_text("Stop once and preserve evidence")
         self.assertIn("accepted visible delta and stop in one checkpoint", stop)
+        self.assertIn("Before returning the final Loop result", stop)
+        self.assertIn("validate that checkpoint", stop)
 
     def test_stop_mapping_parser_rejects_duplicate_or_conflicting_keys(self) -> None:
         with self.assertRaisesRegex(

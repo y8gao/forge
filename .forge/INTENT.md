@@ -17,8 +17,8 @@ format: "forge-memory-v1"
 - Status: active
 
 ### D-002: Markdown is canonical active control memory
-- Decision: `.forge/INTENT.md` and `.forge/MISSION.md` are the only control-memory files kept in the active project tree.
-- Rationale: Human-reviewable, Git-diffable files provide deterministic cross-session orientation without a database-backed runtime.
+- Decision: `.forge/INTENT.md` and `.forge/MISSION.md` are the only control-memory files kept in the active project tree; the host activates a concrete Mission before substantive work and checkpoints every real transition.
+- Rationale: Human-reviewable, Git-diffable files provide deterministic cross-session orientation when their small mandatory transition barriers remain current, without requiring a database-backed runtime.
 - Status: active
 
 ### D-003: Core is lightweight and optional capabilities are explicit

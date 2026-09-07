@@ -16,6 +16,11 @@ All notable changes to this project are documented in this file.
 - Corrected the Codex installation instructions for the public Git marketplace.
 - Limited executable `release.sh` workflow tests to the Linux CI matrix while
   retaining Windows coverage for the cross-platform Python product surface.
+- Required a validated non-placeholder Mission before substantive work, added
+  explicit Loop checkpoint barriers, and made `forge-init` refresh its managed
+  host guidance without changing surrounding user-authored content.
+- Normalized tracked text to LF so portable skill payload checks remain stable
+  in Windows worktrees.
 
 ## [0.1.0] - 2026-09-05
 

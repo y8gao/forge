@@ -27,8 +27,8 @@ current outcome, boundaries, progress, and next action.
 
 ## How it works
 
-1. Ask the agent to initialize Forge in the project.
-2. Describe the outcome you want in ordinary language.
+1. Ask the agent to initialize Forge; this creates a placeholder, not implementation authority.
+2. Describe the outcome in ordinary language to activate a validated Mission before work.
 3. Forge reads active intent, does the work directly, and records only meaningful
    decisions, deliveries, pauses, completions, or Mission replacements.
 4. A later session reads the same two files and continues from the saved next action.
