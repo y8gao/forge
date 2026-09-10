@@ -1,6 +1,6 @@
 {
   "name": "forge-memory-first-dsh",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Experimental Forge Memory-First skill bundle for DeepSeek Harness",
   "license": "MIT",
   "type": "module",
