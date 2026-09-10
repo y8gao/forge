@@ -1,6 +1,7 @@
 ---
 name: forge-memory
-description: Forge Memory-First control memory, mission state, checkpoints, compaction, archives, and deferred external recall.
+description: Use when existing Forge control memory must be updated, validated, checkpointed, paused, resumed, archived, or replaced.
+user-invocable: false
 ---
 
 # forge-memory

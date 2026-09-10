@@ -44,30 +44,19 @@ class CoreUserJourneyContractTests(unittest.TestCase):
 
     def test_skill_files_keep_exact_frontmatter_and_line_budget(self) -> None:
         expected = {
-            CORE: (
-                "forge-core",
-                "Forge Memory-First default behavior for orientation, ordinary "
-                "execution, checkpoints, proportional checks, and explicit "
-                "Loop or Assurance entry.",
-            ),
-            MEMORY: (
-                "forge-memory",
-                "Forge Memory-First control memory, mission state, checkpoints, "
-                "compaction, archives, and deferred external recall.",
-            ),
+            CORE: "forge-core",
+            MEMORY: "forge-memory",
         }
-        for path, (name, description) in expected.items():
+        for path, name in expected.items():
             with self.subTest(path=path):
                 text = path.read_text(encoding="utf-8")
-                self.assertEqual(
-                    [
-                        "---",
-                        f"name: {name}",
-                        f"description: {description}",
-                        "---",
-                    ],
-                    text.splitlines()[:4],
+                frontmatter = text.split("---", 2)[1].strip().splitlines()
+                self.assertEqual(3, len(frontmatter))
+                self.assertEqual(f"name: {name}", frontmatter[0])
+                self.assertTrue(
+                    frontmatter[1].startswith("description: Use when ")
                 )
+                self.assertEqual("user-invocable: false", frontmatter[2])
                 self.assertLess(len(text.splitlines()), 500)
 
     def test_user_starts_in_natural_language_without_workflow_jargon(self) -> None:

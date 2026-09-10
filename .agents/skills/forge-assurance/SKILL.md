@@ -1,6 +1,8 @@
 ---
 name: "forge-assurance"
-description: "Explicit claim-driven independent checking with compact evidence, exact gaps, and honest verification boundaries."
+description: "Use when the user explicitly requests an independent check of concrete claims or authorizes bounded repair after findings."
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Forge Assurance

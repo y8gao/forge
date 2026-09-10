@@ -1,6 +1,7 @@
 ---
 name: "forge-builder"
-description: "Temporary implementation profile selected by the host for a declared write scope and targeted checks."
+description: "Use when the host has confirmed write authority and a declared implementation scope for a focused change."
+user-invocable: false
 ---
 
 # Forge Builder

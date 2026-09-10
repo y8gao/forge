@@ -1,0 +1,6 @@
+interface:
+  display_name: "Forge Loop"
+  short_description: "Explicit bounded delivery loop"
+  default_prompt: "Use $forge-loop for this explicitly requested bounded continuation."
+policy:
+  allow_implicit_invocation: false

@@ -1,6 +1,7 @@
 ---
 name: forge-core
-description: Forge Memory-First default behavior for orientation, ordinary execution, checkpoints, proportional checks, and explicit Loop or Assurance entry.
+description: Use when entering or resuming ordinary work in a Forge-managed project and no explicit Loop or Assurance request is active.
+user-invocable: false
 ---
 
 # forge-core

@@ -1,6 +1,7 @@
 ---
 name: "forge-scout"
-description: "Temporary read-only discovery and research profile selected by the host when a task needs focused investigation."
+description: "Use when the host needs focused read-only evidence or provenance before a decision or implementation change."
+user-invocable: false
 ---
 
 # Forge Scout

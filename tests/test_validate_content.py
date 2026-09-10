@@ -453,6 +453,38 @@ class ValidateContentMutationTests(unittest.TestCase):
                 finally:
                     path.write_text(original, encoding="utf-8")
 
+    def test_profile_user_invocable_requires_boolean_false(self) -> None:
+        relative = "plugins/forge/skills/forge-checker/SKILL.md"
+        for replacement in (
+            "user-invocable: true",
+            'user-invocable: "false"',
+        ):
+            with self.subTest(replacement=replacement):
+                path = self.repo / relative
+                original = path.read_text(encoding="utf-8")
+                self.assertIn("user-invocable: false", original)
+                try:
+                    path.write_text(
+                        original.replace(
+                            "user-invocable: false",
+                            replacement,
+                            1,
+                        ),
+                        encoding="utf-8",
+                    )
+                    result = self.run_validator()
+                    self.assertNotEqual(
+                        0,
+                        result.returncode,
+                        result.stdout + result.stderr,
+                    )
+                    self.assertIn(
+                        "invalid frontmatter value for 'user-invocable'",
+                        result.stdout,
+                    )
+                finally:
+                    path.write_text(original, encoding="utf-8")
+
     def test_task_f_active_memory_write_grant_fails(self) -> None:
         self.mutate_text(
             "plugins/forge/skills/forge-builder/SKILL.md",

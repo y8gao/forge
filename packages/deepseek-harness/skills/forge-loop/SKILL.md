@@ -1,6 +1,8 @@
 ---
 name: "forge-loop"
-description: "Explicit prompt-only bounded delivery loop with visible deltas, falsifying checks, and host-owned checkpoints."
+description: "Use when the user explicitly requests bounded iterative continuation with a defined outcome, scope, and iteration budget."
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Forge Loop

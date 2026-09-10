@@ -9,6 +9,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT / "plugins" / "forge"
 PROFILES = ("forge-scout", "forge-builder", "forge-checker")
+PUBLIC_SKILLS = ("forge-init", "forge-status", "forge-loop", "forge-assurance")
+INTERNAL_SKILLS = (
+    "forge-core",
+    "forge-memory",
+    "forge-scout",
+    "forge-builder",
+    "forge-checker",
+)
 
 
 class CursorPackageTests(unittest.TestCase):
@@ -55,14 +63,45 @@ class CursorPackageTests(unittest.TestCase):
     def test_skills_are_only_slash_entrypoints_and_orientation_rule_is_thin(self) -> None:
         command_dir = PLUGIN / "commands"
         self.assertFalse(command_dir.exists())
-        for name in ("forge-init", "forge-status", "forge-loop", "forge-assurance"):
+        for name in PUBLIC_SKILLS:
             with self.subTest(skill=name):
-                self.assertTrue((PLUGIN / "skills" / name / "SKILL.md").is_file())
+                text = (PLUGIN / "skills" / name / "SKILL.md").read_text(
+                    encoding="utf-8"
+                )
+                self.assertIn("user-invocable: true", text)
+        for name in INTERNAL_SKILLS:
+            with self.subTest(skill=name):
+                text = (PLUGIN / "skills" / name / "SKILL.md").read_text(
+                    encoding="utf-8"
+                )
+                self.assertIn("user-invocable: false", text)
         rule = (PLUGIN / "rules/forge-orientation.mdc").read_text(encoding="utf-8")
         self.assertIn(".forge/INTENT.md", rule)
         self.assertIn(".forge/MISSION.md", rule)
         self.assertIn("skills/forge-core/SKILL.md", rule)
         self.assertLessEqual(len(rule.splitlines()), 20)
+
+    def test_readme_advertises_four_public_entrypoints_and_internal_boundary(
+        self,
+    ) -> None:
+        text = (ROOT / "README.md").read_text(encoding="utf-8")
+        for marker in (
+            "## Public interface",
+            "`forge-init`",
+            "`forge-status`",
+            "`forge-loop`",
+            "`forge-assurance`",
+            "## Advanced host capabilities",
+            "`forge-core`",
+            "`forge-memory`",
+            "`forge-scout`",
+            "`forge-builder`",
+            "`forge-checker`",
+            "internal control protocols",
+            "host visibility limitation",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, text)
 
 
 if __name__ == "__main__":
