@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-10
+
 ### Changed
 - Reduced Forge's advertised interface to four user-invocable skills while
   preserving Core, Memory, and temporary profiles as model-available internal

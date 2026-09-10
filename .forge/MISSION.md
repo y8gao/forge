@@ -2,7 +2,7 @@
 format: "forge-memory-v1"
 mission_id: "publish-forge-0.3.0"
 state: "working"
-checkpointed_at: "2026-09-10T07:42:49Z"
+checkpointed_at: "2026-09-10T07:52:47Z"
 ---
 # Current Mission
 
@@ -22,18 +22,18 @@ checkpointed_at: "2026-09-10T07:42:49Z"
 - [ ] The release commit and tag are pushed and a non-draft, non-prerelease GitHub Release is verified.
 
 ## Latest Delivery
-- Cursor Agent 2026.09.08-6caf4ff interactively showed only forge-init, forge-status, forge-loop, and forge-assurance under /forge-; three separate subagent profiles remained visible as designed.
+- PR #3 merged the CI-verified public-interface change into main; Core CI run 34451871437 then passed all nine jobs on merge commit f1049e2.
 
 ## Next Action
-- Review the complete feature diff, commit it, push the feature branch, and open a pull request to trigger Core CI.
+- Commit the 0.3.0 changelog and Mission checkpoint, then run the two-phase release.sh protocol from clean synchronized main.
 
 ## Blockers
 - None.
 
 ## Last Check
-- Ran: Manual /forge- autocomplete showed four public Forge skills; 326 unit tests passed with 12 skipped; validate-content, sync-portable-skills, and forge-memory-validate passed.
-- Boundary: Local verification is complete; GitHub CI, main integration, release preparation, tag publication, and GitHub Release remain pending.
+- Ran: PR #3 checks passed; merge commit f1049e2 was pushed to main; Core CI run 34451871437 completed successfully with nine passing jobs.
+- Boundary: The product change is ci_verified; 0.3.0 version files, release commit, tag, push, GitHub Release, and post-publication verification remain pending.
 
 ## Resume
 - Read: `.forge/INTENT.md` and `.forge/MISSION.md` only.
-- Do: Review the complete feature diff, commit it, push the feature branch, and open a pull request to trigger Core CI.
+- Do: Commit the 0.3.0 changelog and Mission checkpoint, then run the two-phase release.sh protocol from clean synchronized main.
