@@ -285,7 +285,7 @@ def _normalized_prose(text: str) -> str:
 def _validate_exact_frontmatter(
     root: Path,
     path: Path,
-    expected: dict[str, str | None],
+    expected: dict[str, str | bool | None],
 ) -> list[str]:
     relative = _relative(root, path)
     text = path.read_text(encoding="utf-8")
@@ -296,7 +296,7 @@ def _validate_exact_frontmatter(
     )
     if not match:
         return [f"invalid frontmatter block: {relative}"]
-    values: dict[str, str] = {}
+    values: dict[str, object] = {}
     keys: list[str] = []
     errors: list[str] = []
     for line in match.group(1).splitlines():
@@ -318,12 +318,6 @@ def _validate_exact_frontmatter(
                 f"for {key!r}: {relative}"
             )
             continue
-        if not isinstance(parsed, str):
-            errors.append(
-                f"frontmatter value must decode to a string "
-                f"for {key!r}: {relative}"
-            )
-            continue
         values[key] = parsed
     if set(keys) != set(expected) or len(keys) != len(expected):
         errors.append(
@@ -333,11 +327,22 @@ def _validate_exact_frontmatter(
     for key, expected_value in expected.items():
         if key not in values:
             continue
-        if expected_value is None and not values[key]:
+        actual_value = values[key]
+        if expected_value is None and (
+            not isinstance(actual_value, str) or not actual_value
+        ):
             errors.append(
                 f"frontmatter value for {key!r} must be nonempty: {relative}"
             )
-        elif expected_value is not None and values[key] != expected_value:
+        elif isinstance(expected_value, str) and not isinstance(
+            actual_value,
+            str,
+        ):
+            errors.append(
+                f"frontmatter value must decode to a string "
+                f"for {key!r}: {relative}"
+            )
+        elif expected_value is not None and actual_value != expected_value:
             errors.append(
                 f"invalid frontmatter value for {key!r}: {relative}"
             )
@@ -817,6 +822,7 @@ def validate() -> list[str]:
                     {
                         "name": path.parent.name,
                         "description": None,
+                        "user-invocable": False,
                     },
                 )
             )

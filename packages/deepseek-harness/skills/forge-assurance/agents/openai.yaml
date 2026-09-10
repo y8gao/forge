@@ -1,0 +1,6 @@
+interface:
+  display_name: "Forge Assurance"
+  short_description: "Explicit independent claim checking"
+  default_prompt: "Use $forge-assurance for this explicitly requested independent check."
+policy:
+  allow_implicit_invocation: false

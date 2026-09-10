@@ -1,6 +1,7 @@
 ---
 name: "forge-checker"
-description: "Temporary read-only checking and attack profile selected by the host for explicit claims."
+description: "Use when an explicit Assurance or independent-check request requires fresh read-only falsification of concrete claims."
+user-invocable: false
 ---
 
 # Forge Checker

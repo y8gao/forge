@@ -1,6 +1,7 @@
 ---
 name: forge-init
-description: Initialize Forge Memory-First control memory in an existing project.
+description: Use when a project does not yet contain valid Forge INTENT.md and MISSION.md control memory.
+user-invocable: true
 ---
 
 # Forge Init

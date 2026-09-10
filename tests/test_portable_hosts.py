@@ -41,6 +41,34 @@ class PortableHostPackageTests(unittest.TestCase):
                 }
                 self.assertEqual(canonical_files, portable_files)
 
+    def test_portable_payloads_preserve_public_interface_classification(
+        self,
+    ) -> None:
+        expected = {
+            "forge-init": "true",
+            "forge-status": "true",
+            "forge-loop": "true",
+            "forge-assurance": "true",
+            "forge-core": "false",
+            "forge-memory": "false",
+            "forge-scout": "false",
+            "forge-builder": "false",
+            "forge-checker": "false",
+        }
+        for root in (
+            ROOT / ".agents/skills",
+            ROOT / "packages/deepseek-harness/skills",
+        ):
+            for name, visibility in expected.items():
+                with self.subTest(root=root, skill=name):
+                    text = (root / name / "SKILL.md").read_text(
+                        encoding="utf-8"
+                    )
+                    self.assertIn(
+                        f"user-invocable: {visibility}",
+                        text,
+                    )
+
     def test_portable_skill_payload_is_self_contained_and_in_sync(self) -> None:
         runtime = PLUGIN / "skills" / "forge-memory" / "assets" / "portable"
         for relative in (

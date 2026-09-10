@@ -11,20 +11,18 @@ LOOP = ROOT / "plugins/forge/skills/forge-loop/SKILL.md"
 CORE = ROOT / "plugins/forge/skills/forge-core/SKILL.md"
 
 
-def parse_frontmatter(path: Path) -> dict[str, str]:
+def parse_frontmatter(path: Path) -> dict[str, object]:
     text = path.read_text(encoding="utf-8")
     opening, block, _body = text.split("---", 2)
     if opening:
         raise AssertionError("frontmatter must be the first content")
-    values: dict[str, str] = {}
+    values: dict[str, object] = {}
     for line in block.strip().splitlines():
         key, raw = line.split(":", 1)
         key = key.strip()
         if key in values:
             raise AssertionError(f"duplicate frontmatter key: {key}")
         value = json.loads(raw.strip())
-        if not isinstance(value, str):
-            raise AssertionError("frontmatter values must be strings")
         values[key] = value
     return values
 
@@ -102,16 +100,20 @@ class LoopUserJourneyContractTests(unittest.TestCase):
                 self.assertNotIn(marker, text)
 
     def test_skill_keeps_exact_frontmatter_and_line_budget(self) -> None:
+        metadata = parse_frontmatter(LOOP)
         self.assertEqual(
             {
-                "name": "forge-loop",
-                "description": (
-                    "Explicit prompt-only bounded delivery loop with visible "
-                    "deltas, falsifying checks, and host-owned checkpoints."
-                ),
+                "name",
+                "description",
+                "user-invocable",
+                "disable-model-invocation",
             },
-            parse_frontmatter(LOOP),
+            set(metadata),
         )
+        self.assertEqual("forge-loop", metadata["name"])
+        self.assertTrue(str(metadata["description"]).startswith("Use when "))
+        self.assertIs(True, metadata["user-invocable"])
+        self.assertIs(True, metadata["disable-model-invocation"])
         self.assertLess(len(LOOP.read_text(encoding="utf-8").splitlines()), 500)
 
     def test_duplicate_frontmatter_keys_are_rejected(self) -> None:

@@ -1,6 +1,7 @@
 ---
 name: forge-status
-description: Show the current Forge Memory-First mission from active project memory.
+description: Use when the user asks for the current Forge Mission, progress, blockers, next action, or verification boundary.
+user-invocable: true
 ---
 
 # Forge Status

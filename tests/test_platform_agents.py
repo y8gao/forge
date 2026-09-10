@@ -186,7 +186,10 @@ class PlatformAgentPackagingTests(unittest.TestCase):
 
     def test_readme_use_is_scenario_first_and_honest_across_hosts(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
-        use = readme.split("## Use\n", 1)[1].split("\n## Validate", 1)[0]
+        use = readme.split("## Use\n", 1)[1].split(
+            "\n## Public interface",
+            1,
+        )[0]
         for phrase in (
             "Claude Code, Codex, Cursor, Command Code, Pi, or DeepSeek Harness",
             "ordinary work",

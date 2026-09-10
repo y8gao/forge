@@ -1,38 +1,39 @@
 ---
 format: "forge-memory-v1"
-mission_id: "release-forge-0.2.0"
-state: "done"
-checkpointed_at: "2026-09-07T10:03:30Z"
+mission_id: "publish-forge-0.3.0"
+state: "working"
+checkpointed_at: "2026-09-10T07:42:49Z"
 ---
 # Current Mission
 
 ## Outcome
-- Statement: Publish Forge version 0.2.0 from the verified main branch.
+- Statement: Publish Forge 0.3.0 after the public-interface change passes GitHub CI.
 
 ## Scope
-- In: Changelog finalization, release preparation checks, synchronized version manifests, release commit, v0.2.0 tag, push, GitHub Release, and post-publication verification.
-- Out: Additional product changes, dependency upgrades, automated deployment, or unrelated repository cleanup.
-- Constraints: Follow scripts/release.sh and its allowlist/receipt protocol; preserve existing release history; stop on any failed check.
+- In: Interactive Cursor visibility evidence, feature commit and push, pull-request CI, integration to main, release preparation, v0.3.0 tag push, GitHub Release, and publication verification.
+- Out: Unrelated product changes, automated deployment, or bypassing required GitHub checks.
+- Constraints: Follow scripts/release.sh and its allowlist/receipt protocol; release only from a clean synchronized main branch after required CI passes.
 
 ## Success Criteria
-- [x] Changelog contains a committed 0.2.0 entry and the preparation branch is clean and synchronized.
-- [x] release.sh prepares and validates exactly the six allowed version files for 0.2.0.
-- [x] The release commit and v0.2.0 tag are pushed and their CI evidence is reported honestly.
-- [x] A non-draft, non-prerelease GitHub Release for v0.2.0 is published and verified.
+- [ ] The four-public/five-internal Cursor visibility result is recorded in committed control memory.
+- [ ] The feature commit is pushed and its required GitHub CI checks pass.
+- [ ] The public-interface change is integrated into main without bypassing required checks.
+- [ ] release.sh prepares and commits exactly the allowed 0.3.0 version files and creates v0.3.0.
+- [ ] The release commit and tag are pushed and a non-draft, non-prerelease GitHub Release is verified.
 
 ## Latest Delivery
-- Published Forge v0.2.0 with synchronized version manifests, a sealed release commit and tag, passing Core CI, and a verified public GitHub Release.
+- Cursor Agent 2026.09.08-6caf4ff interactively showed only forge-init, forge-status, forge-loop, and forge-assurance under /forge-; three separate subagent profiles remained visible as designed.
 
 ## Next Action
-- Await user direction for the next Forge Mission.
+- Review the complete feature diff, commit it, push the feature branch, and open a pull request to trigger Core CI.
 
 ## Blockers
 - None.
 
 ## Last Check
-- Ran: release.sh prepare and commit checks passed twice; release commit 8805bd2 and v0.2.0 tag match origin; Core CI run 34109078124 completed successfully; gh release view confirms Forge 0.2.0 is published, non-draft, and non-prerelease; VERSION and all five manifests equal 0.2.0.
-- Boundary: CI-verified for configured Core CI and release protocol; Claude and Codex CLIs were unavailable locally, so static package checks covered them. No automated deployment beyond the GitHub Release was performed.
+- Ran: Manual /forge- autocomplete showed four public Forge skills; 326 unit tests passed with 12 skipped; validate-content, sync-portable-skills, and forge-memory-validate passed.
+- Boundary: Local verification is complete; GitHub CI, main integration, release preparation, tag publication, and GitHub Release remain pending.
 
 ## Resume
 - Read: `.forge/INTENT.md` and `.forge/MISSION.md` only.
-- Do: Await user direction for the next Forge Mission.
+- Do: Review the complete feature diff, commit it, push the feature branch, and open a pull request to trigger Core CI.

@@ -47,8 +47,9 @@ and other external effects still require specific authorization.
 - Pi Coding Agent: Pi package declared by the root `package.json`
 - DeepSeek Harness: experimental DSH bundle in `packages/deepseek-harness`
 
-All six hosts receive the same nine skills. Claude Code, Codex, and Cursor also
-provide native wrappers for `forge-scout`, `forge-builder`, and
+All six hosts package the same nine skills. Four are public user entrypoints;
+five are model-available internal capabilities. Claude Code, Codex, and Cursor
+also provide native wrappers for `forge-scout`, `forge-builder`, and
 `forge-checker`. Command Code, Pi, and DeepSeek Harness have Core-level support.
 Forge does not guarantee Scout/Builder/Checker permission isolation on those
 hosts, although the profile skills remain available.
@@ -73,8 +74,9 @@ codex plugin add forge@forge
 
 Add this repository's `.cursor-plugin/marketplace.json` through Cursor's plugin
 marketplace, then install `forge`. The package explicitly declares shared
-skills, a Cursor orientation rule, and the three native agents. Skills are the
-only slash-invokable Forge entrypoints, avoiding duplicate command names.
+skills, a Cursor orientation rule, and the three native agents. Four public
+skills are the only advertised slash-invokable Forge entrypoints; the remaining
+skills are model-available internal capabilities.
 
 ### Command Code
 
@@ -135,6 +137,31 @@ the shared interaction across hosts. This package describes shared contracts
 and packaging, but does not claim live all-host behavior has been exercised.
 Only the host agent writes active control memory, and historical material
 under `.forge/archive/` is not loaded by default.
+
+## Public interface
+
+Ordinary work starts with natural language. Use these explicit entrypoints only
+when direct control is useful:
+
+- `forge-init`: initialize Memory-First control memory.
+- `forge-status`: show the current Mission and verification boundary.
+- `forge-loop`: enter an explicitly requested bounded delivery loop.
+- `forge-assurance`: enter explicitly requested independent checking.
+
+Loop and Assurance never activate from complexity or risk alone.
+
+## Advanced host capabilities
+
+`forge-core` and `forge-memory` provide the default reasoning and control-memory
+contracts. `forge-scout`, `forge-builder`, and `forge-checker` are temporary
+profiles selected by the host when their focused capability is useful. They
+remain packaged and model-available but are not advertised as user commands.
+The six executables under `plugins/forge/scripts/` are internal control protocols,
+not normal conversational entrypoints.
+
+This classification is a product contract, but actual menu hiding remains a
+host visibility limitation: Cursor CLI documents it, while other surfaces may
+ignore or represent the metadata differently.
 
 ## Validate
 

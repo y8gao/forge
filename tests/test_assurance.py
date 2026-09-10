@@ -70,17 +70,15 @@ DENY_REGEX_CLASSES = {
 }
 
 
-def parse_frontmatter(path: Path) -> dict[str, str]:
+def parse_frontmatter(path: Path) -> dict[str, object]:
     text = path.read_text(encoding="utf-8")
     opening, block, _body = text.split("---", 2)
     if opening:
         raise AssertionError("frontmatter must be the first content")
-    values: dict[str, str] = {}
+    values: dict[str, object] = {}
     for line in block.strip().splitlines():
         key, raw = line.split(":", 1)
         value = json.loads(raw.strip())
-        if not isinstance(value, str):
-            raise AssertionError("frontmatter values must be strings")
         values[key.strip()] = value
     return values
 
@@ -159,16 +157,20 @@ class AssurancePromptContractTests(unittest.TestCase):
         return " ".join(" ".join(lines).split())
 
     def test_skill_has_exact_frontmatter_and_stays_small(self) -> None:
+        metadata = parse_frontmatter(ASSURANCE)
         self.assertEqual(
             {
-                "name": "forge-assurance",
-                "description": (
-                    "Explicit claim-driven independent checking with compact "
-                    "evidence, exact gaps, and honest verification boundaries."
-                ),
+                "name",
+                "description",
+                "user-invocable",
+                "disable-model-invocation",
             },
-            parse_frontmatter(ASSURANCE),
+            set(metadata),
         )
+        self.assertEqual("forge-assurance", metadata["name"])
+        self.assertTrue(str(metadata["description"]).startswith("Use when "))
+        self.assertIs(True, metadata["user-invocable"])
+        self.assertIs(True, metadata["disable-model-invocation"])
         self.assertLess(
             len(ASSURANCE.read_text(encoding="utf-8").splitlines()),
             500,

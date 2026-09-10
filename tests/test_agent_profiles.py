@@ -82,10 +82,17 @@ class AgentProfileContractTests(unittest.TestCase):
                     frontmatter,
                     r'(?m)^description: "(?:[^"\\]|\\.)+"$',
                 )
+                values: dict[str, object] = {}
                 for line in frontmatter.strip().splitlines():
-                    _, raw = line.split(":", 1)
-                    value = json.loads(raw.strip())
-                    self.assertIsInstance(value, str)
+                    key, raw = line.split(":", 1)
+                    values[key.strip()] = json.loads(raw.strip())
+                self.assertEqual(
+                    {"name", "description", "user-invocable"},
+                    set(values),
+                )
+                self.assertEqual(name, values["name"])
+                self.assertIsInstance(values["description"], str)
+                self.assertIs(False, values["user-invocable"])
                 self.assertLess(len(text.splitlines()), 500)
 
     def test_profiles_are_optional_temporary_and_host_selected(self) -> None:
