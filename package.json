@@ -1,6 +1,6 @@
 {
   "name": "forge-memory-first",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Portable Forge Memory-First skills for coding agents",
   "license": "MIT",
   "repository": {
