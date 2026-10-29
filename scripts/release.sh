@@ -66,7 +66,7 @@ run_required_checks() {
   fi
   python3 scripts/validate-content.py || return 1
   python3 plugins/forge/scripts/forge-memory-validate . || return 1
-  python3 -m unittest tests.test_platform_agents tests.test_cursor_package tests.test_portable_hosts tests.test_agent_profiles tests.test_product_scope tests.test_validate_content tests.test_release_receipt || return 1
+  python3 -m unittest tests.test_platform_agents tests.test_cursor_package tests.test_portable_hosts tests.test_agent_profiles tests.test_product_scope tests.test_validate_content tests.test_release_receipt tests.test_forge_guard || return 1
   FORGE_RELEASE_TESTING=1 python3 -m unittest tests.test_release || return 1
   bash -n scripts/release.sh || return 1
   if command -v claude >/dev/null 2>&1; then
