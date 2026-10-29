@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+"""Claude Code PreToolUse guard for Forge active memory."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import sys
+
+
+sys.dont_write_bytecode = True
+LIB = Path(__file__).resolve().parents[1] / "lib"
+sys.path.insert(0, str(LIB))
+
+from forge_memory import MemoryValidationError, load_mission
+
+
+BLOCKED_STATES = {
+    "done": (
+        "`done` is closed. Ask the user to confirm the next Mission, publish it "
+        "as `ready` with `forge-compact --replace-from`, then retry."
+    ),
+    "paused": "`paused` needs the user to resume the Mission before work continues.",
+    "blocked": "`blocked` needs the blocker resolved or the Mission revised first.",
+}
+
+
+def _target_path(payload: dict[str, object], cwd: Path) -> Path | None:
+    tool_input = payload.get("tool_input")
+    if not isinstance(tool_input, dict):
+        return None
+    for key in ("file_path", "notebook_path"):
+        value = tool_input.get(key)
+        if isinstance(value, str) and value:
+            path = Path(value)
+            return path if path.is_absolute() else cwd / path
+    return None
+
+
+def _project_root(target: Path | None, cwd: Path) -> Path | None:
+    start = target.parent if target is not None else cwd
+    try:
+        start = start.resolve()
+    except OSError:
+        return None
+    for directory in (start, *start.parents):
+        if (directory / ".forge" / "MISSION.md").is_file():
+            return directory
+    return None
+
+
+def _inside_forge(project_root: Path, target: Path | None) -> bool:
+    if target is None:
+        return False
+    try:
+        target.resolve().relative_to((project_root / ".forge").resolve())
+    except (OSError, ValueError):
+        return False
+    return True
+
+
+def _refusal(mission) -> str | None:
+    if mission.mission_id == "initial":
+        return (
+            'MISSION has `mission_id: "initial"`. Activate a real `ready` Mission '
+            "with `forge-compact --replace-from` before editing project files."
+        )
+    action = BLOCKED_STATES.get(mission.state)
+    if action is None:
+        return None
+    return (
+        f'MISSION state is "{mission.state}" (mission: {mission.mission_id}). '
+        f"{action}"
+    )
+
+
+def main() -> int:
+    try:
+        payload = json.load(sys.stdin)
+    except (json.JSONDecodeError, OSError, UnicodeError):
+        return 0
+    if not isinstance(payload, dict):
+        return 0
+
+    raw_cwd = payload.get("cwd")
+    if not isinstance(raw_cwd, str) or not raw_cwd:
+        return 0
+    cwd = Path(raw_cwd)
+
+    target = _target_path(payload, cwd)
+    project_root = _project_root(target, cwd)
+    if project_root is None or _inside_forge(project_root, target):
+        return 0
+
+    try:
+        mission = load_mission(project_root / ".forge" / "MISSION.md")
+    except (MemoryValidationError, OSError, UnicodeError):
+        return 0
+
+    refusal = _refusal(mission)
+    if refusal is None:
+        return 0
+
+    tool_name = payload.get("tool_name", "edit")
+    print(
+        f"forge-guard: blocked {tool_name} on {target or project_root}.\n"
+        f"{refusal}\n"
+        "Edits under `.forge/` are exempt so the Mission can be repaired.",
+        file=sys.stderr,
+    )
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

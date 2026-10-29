@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-29
+
+### Added
+- Added a host-native Claude Code `PreToolUse` guard that refuses substantive
+  edits while the active Mission is `done`, `paused`, `blocked`, or still
+  `mission_id: "initial"`, and names the next action. Writes under `.forge/`
+  stay exempt so the Mission can be repaired.
+
 ## [0.3.0] - 2026-09-10
 
 ### Changed

@@ -1,0 +1,17 @@
+{
+  "description": "Block substantive edits while Forge active memory is not authorized for work.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/forge-guard\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

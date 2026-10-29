@@ -156,8 +156,16 @@ Loop and Assurance never activate from complexity or risk alone.
 contracts. `forge-scout`, `forge-builder`, and `forge-checker` are temporary
 profiles selected by the host when their focused capability is useful. They
 remain packaged and model-available but are not advertised as user commands.
-The six executables under `plugins/forge/scripts/` are internal control protocols,
+The seven executables under `plugins/forge/scripts/` are internal control protocols,
 not normal conversational entrypoints.
+
+On Claude Code, the plugin also installs a host-native `PreToolUse` guard.
+Substantive `Edit`/`Write` calls are refused while the active Mission is
+`done`, `paused`, or `blocked`, or still has `mission_id: "initial"`. The
+refusal names the next step, and writes under `.forge/` stay exempt so the
+Mission can be repaired. This uses Claude Code's hook mechanism; it does not
+add a Forge runtime or daemon. The guard invokes `python3`; hosts that expose
+Python only as `python` or `py` need an alias before enabling it.
 
 This classification is a product contract, but actual menu hiding remains a
 host visibility limitation: Cursor CLI documents it, while other surfaces may
@@ -168,7 +176,8 @@ ignore or represent the metadata differently.
 ```sh
 python -m unittest tests.test_platform_agents tests.test_cursor_package \
   tests.test_portable_hosts \
-  tests.test_release tests.test_release_receipt
+  tests.test_release tests.test_release_receipt \
+  tests.test_forge_guard
 python scripts/validate-content.py
 git diff --check
 ```

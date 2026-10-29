@@ -1,39 +1,42 @@
 ---
 format: "forge-memory-v1"
-mission_id: "publish-forge-0.3.0"
-state: "done"
-checkpointed_at: "2026-09-10T08:48:10Z"
+mission_id: "publish-forge-0.4.0"
+state: "ready"
+checkpointed_at: null
 ---
 # Current Mission
 
 ## Outcome
-- Statement: Publish Forge 0.3.0 after the public-interface change passes GitHub CI.
+- Statement: Publish Forge 0.4.0 with the Claude Code mission guard after the feature passes GitHub CI.
 
 ## Scope
-- In: Interactive Cursor visibility evidence, feature commit and push, pull-request CI, integration to main, release preparation, v0.3.0 tag push, GitHub Release, and publication verification.
-- Out: Unrelated product changes, automated deployment, or bypassing required GitHub checks.
-- Constraints: Follow scripts/release.sh and its allowlist/receipt protocol; release only from a clean synchronized main branch after required CI passes.
+- In: Feature branch and PR, Core CI, merge to main, release preparation, v0.4.0 tag, push, GitHub Release, publication verification, and the local plugin switch to the published artifact.
+- Out: Unrelated product changes, automated deployment, bypassing required checks, and publishing a build that has not passed CI.
+- Constraints: Follow `scripts/release.sh` and its allowlist/receipt protocol; release only from a clean synchronized main branch after Core CI passes; do not add attribution trailers.
 
 ## Success Criteria
-- [x] The four-public/five-internal Cursor visibility result is recorded in committed control memory.
-- [x] The feature commit is pushed and its required GitHub CI checks pass.
-- [x] The public-interface change is integrated into main without bypassing required checks.
-- [x] release.sh prepares and commits exactly the allowed 0.3.0 version files and creates v0.3.0.
-- [x] The release commit and tag are pushed and a non-draft, non-prerelease GitHub Release is verified.
+- [ ] The guard feature and its tests are committed and pushed on a feature branch.
+- [ ] Core CI passes on the pull request and on main after merge.
+- [ ] `scripts/release.sh prepare 0.4.0` produces exactly the six-file version diff.
+- [ ] `scripts/release.sh commit 0.4.0 --authorized` creates `release(forge): v0.4.0` and tag `v0.4.0`.
+- [ ] The release commit and tag are pushed, and Core CI passes on the release commit.
+- [ ] A non-draft, non-prerelease GitHub Release for `v0.4.0` is verified.
+- [ ] The published `forge@forge` 0.4.0 install is verified, and the local `forge-local` copy is disabled or removed.
+- [ ] `.forge/MISSION.md` records the release and validates.
 
 ## Latest Delivery
-- Published Forge v0.3.0 with the simplified four-entrypoint public interface, synchronized version manifests, release commit 52c8158, passing Core CI, and a verified public GitHub Release.
+- None yet; this Mission was just activated.
 
 ## Next Action
-- Await user direction for the next Forge Mission.
+- Revert the six version files to 0.3.0, commit the guard feature with the 0.4.0 changelog entry, and push the feature branch.
 
 ## Blockers
 - None.
 
 ## Last Check
-- Ran: release.sh prepare and commit checks passed; release commit 52c8158 and v0.3.0 match origin; Core CI run 34456339275 succeeded; gh release view confirms Forge 0.3.0 is published, non-draft, and non-prerelease; all six version values equal 0.3.0.
-- Boundary: ci_verified for configured Core CI and release protocol; live Cursor CLI visibility was manually verified locally; Claude and Codex CLIs were unavailable during local release checks, so their pinned CI installation gates provide host evidence. No automated deployment beyond the GitHub Release was performed.
+- Ran: none; Mission activation only.
+- Boundary: no feature commit, release commit, tag, or push yet.
 
 ## Resume
-- Read: `.forge/INTENT.md` and `.forge/MISSION.md` only.
-- Do: Await user direction for the next Forge Mission.
+- Read: `.forge/INTENT.md`, `.forge/MISSION.md`, `VERSION`, `scripts/release.sh`.
+- Do: commit the feature, open the PR, and proceed through the release protocol.

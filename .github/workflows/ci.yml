@@ -113,7 +113,12 @@ jobs:
         with:
           node-version: "22"
       - name: Install pinned Command Code CLI
-        run: npm install --global "command-code@${COMMAND_CODE_VERSION}"
+        run: |
+          # 1.41+ removed the default ESM export that command-code imports;
+          # install the last compatible line as a sibling so npm hoists it.
+          npm install --global \
+            "command-code@${COMMAND_CODE_VERSION}" \
+            "@opentelemetry/semantic-conventions@1.40.0"
       - name: Discover portable project skills
         env:
           HOME: ${{ runner.temp }}/command-code-home
