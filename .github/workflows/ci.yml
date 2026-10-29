@@ -111,10 +111,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          # command-code 1.49.1 crashes on Node 22.23.4; 22.23.2 is the last green.
-          node-version: "22.23.2"
+          node-version: "22"
       - name: Install pinned Command Code CLI
-        run: npm install --global "command-code@${COMMAND_CODE_VERSION}"
+        run: |
+          # 1.41+ removed the default ESM export that command-code imports;
+          # install the last compatible line as a sibling so npm hoists it.
+          npm install --global \
+            "command-code@${COMMAND_CODE_VERSION}" \
+            "@opentelemetry/semantic-conventions@1.40.0"
       - name: Discover portable project skills
         env:
           HOME: ${{ runner.temp }}/command-code-home
