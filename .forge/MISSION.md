@@ -24,10 +24,10 @@ checkpointed_at: "2026-11-25T03:00:00Z"
 - [ ] tsn-scheduler 的 `.gitignore` / bridge 变更提交后回归全绿（提交归用户）。
 
 ## Latest Delivery
-- 2026-11-25（v0.5.0 已发布）：`forge-guard` 改为六态解析模型（记忆故障 fail closed、机制故障 fail open、checkout 边界统一覆盖链接工作树/嵌套 repo/submodule）；`forge-init` 的 bridge 扩为 24 行政策（M1–M10）并自动维护 `.gitignore` 忽略规则；三份 portable 拷贝同步；测试 guard 18 例 + init 14 例。发版：功能提交 `8ebe9f9`、六文件发版提交 `66ff830`、tag `v0.5.0` 已推、GitHub Release 已发布、已安装插件 0.4.0 → 0.5.0（guard/init 与仓库逐字节相同，并用worktree 无任务 / tsn-scheduler done / 本仓 working 三个探针验证过行为）。
+- 2026-11-25（v0.5.1 已发布）：`forge-guard` 六态解析模型（记忆故障 fail closed、机制故障 fail open、checkout 边界覆盖链接工作树/嵌套 repo/submodule）；`forge-init` 的 bridge 为 25 行政策（Memory-First + M1–M10 + 版本戳），并自动维护 `.gitignore` 忽略规则；三份 portable 拷贝同步；测试 guard 18 例 + init 15 例。发版：功能提交 `8ebe9f9` / `221678c`，发版提交 `66ff830`（v0.5.0）/ `74b6cfc`（v0.5.1），tag `v0.5.0`/`v0.5.1` 与 main 均已推送，两个 GitHub Release 已发布；已安装插件 0.4.0 → 0.5.1（guard/init 与仓库逐字节相同，三个行为探针验证）；tsn-scheduler 的两个 bridge 已盖 v0.5.1 戳。
 
 ## Next Action
-- 重启 Claude Code 让 0.5.0 的 hook 生效；随后在 tsn-scheduler 审查并提交已暂存的 `git rm --cached` + `.gitignore` + 两个 bridge（提交需用户授权）；再两侧各跑一遍全量测试。
+- 重启 Claude Code 让 0.5.1 的 hook 生效；随后在 tsn-scheduler 审查并提交已暂存的 `git rm --cached` + `.gitignore` + 两个 bridge（提交需用户授权）；再两侧各跑一遍全量测试。
 
 ## Blockers
 - None.
