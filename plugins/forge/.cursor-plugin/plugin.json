@@ -1,7 +1,7 @@
 {
   "name": "forge",
   "description": "Memory-First continuity for Cursor with shared skills and Scout, Builder, and Checker capability profiles.",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "author": {
     "name": "Yang Gao"
   },
