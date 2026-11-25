@@ -19,6 +19,8 @@ from forge_memory import (
 
 BEGIN_MARKER = "<!-- BEGIN FORGE MEMORY-FIRST -->"
 END_MARKER = "<!-- END FORGE MEMORY-FIRST -->"
+IGNORE_COMMENT = "# Forge active Mission: one per checkout, never shared\n"
+IGNORE_RULE = ".forge/MISSION.md\n"
 BRIDGE = (
     f"{BEGIN_MARKER}\n"
     "## Forge Memory-First\n"
@@ -34,6 +36,30 @@ BRIDGE = (
     "Checkpoint user decisions, accepted visible delivery, pause, completion, "
     "or Mission replacement.\n"
     "Do not checkpoint reads, edits, tests, or narration.\n"
+    "\n"
+    "### One active Mission per checkout\n"
+    "- M1 `.forge/MISSION.md` is this checkout's active Mission, not shared "
+    "state: never commit it, and never borrow another checkout's Mission.\n"
+    "- M2 Run `forge-init` in a new checkout or worktree before substantive "
+    "work; run one concurrent agent per worktree.\n"
+    "- M3 Archive or replace this checkout's Mission with `forge-compact "
+    "--complete` before removing its worktree.\n"
+    "\n"
+    "### Design workflow collaboration\n"
+    "- M4 Complete small, reversible, single-surface changes directly and "
+    "report evidence. Write a design document first when a change touches "
+    "public behavior, cannot be reversed, spans subsystems, or must survive a "
+    "session handoff; get user approval before building.\n"
+    "- M5 Design documents and plans belong in this project's document "
+    "directory, which `.forge/INTENT.md` records; tool-private paths such as "
+    "`docs/superpowers/` are not project records.\n"
+    "- M6 After a design document is approved, project its outcome, decisions, "
+    "and acceptance criteria into MISSION and INTENT before starting a plan.\n"
+    "- M7 Every plan step maps to one Success Criterion in the active Mission.\n"
+    "- M8 Report only evidence actually observed; local test output never "
+    "claims more than `locally_verified`.\n"
+    "- M9 Independent checking starts only when the user asks for it.\n"
+    "- M10 Do not commit, push, or merge without explicit authorization.\n"
     f"{END_MARKER}"
 )
 
@@ -56,6 +82,27 @@ def _validate_bridge(path: Path) -> bytes | None:
     if begin_count == 1 and end_count == 1 and content.index(begin) < content.index(end):
         return content
     raise ValueError(f"malformed Forge Memory-First markers in {path}")
+
+
+def _ensure_ignore_rule(project_root: Path, path: Path) -> bool:
+    """Keep this checkout's active Mission out of version control."""
+    try:
+        content = path.read_bytes() if path.exists() else b""
+    except OSError as error:
+        raise ValueError(f"cannot read {path}: {error}") from None
+    try:
+        text = content.decode("utf-8")
+    except UnicodeError as error:
+        raise ValueError(f"{path} is not UTF-8: {error}") from None
+    if any(line.strip() == IGNORE_RULE.strip() for line in text.splitlines()):
+        return False
+    separator = b"\n" if content and not content.endswith(b"\n") else b""
+    atomic_write(
+        project_root,
+        path,
+        content + separator + (IGNORE_COMMENT + IGNORE_RULE).encode("utf-8"),
+    )
+    return True
 
 
 def _append_bridge(project_root: Path, path: Path) -> None:
@@ -142,7 +189,26 @@ def main(arguments: list[str]) -> int:
     except (OSError, UnicodeError, ValueError) as error:
         return _error(str(error), code=1)
 
+    ignore_changed = False
+    try:
+        ignore_changed = _ensure_ignore_rule(project_root, project_root / ".gitignore")
+    except (OSError, UnicodeError, ValueError) as error:
+        print(
+            "forge-init WARNING: cannot keep `.forge/MISSION.md` out of version "
+            f"control: {error}",
+            file=sys.stderr,
+        )
+
     print(f"forge-init initialized {project_root}")
+    if ignore_changed:
+        print(
+            "forge-init ignore rule added: `.forge/MISSION.md` stays local to "
+            "this checkout"
+        )
+        print(
+            "forge-init NEXT: if `.forge/MISSION.md` is already tracked, run: "
+            "git rm --cached .forge/MISSION.md"
+        )
     if active_mission.mission_id == "initial":
         print("forge-init NEXT: activate the placeholder Mission before substantive work")
     return 0

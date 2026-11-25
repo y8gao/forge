@@ -4,6 +4,24 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-25
+
+### Changed
+- Made active Mission memory belong to one checkout: `forge-init` now keeps
+  `.forge/MISSION.md` out of version control and publishes a project policy
+  (M1–M10) that hands plan, design, and verification artifacts to the active
+  Mission instead of letting a parallel workflow own them.
+- Rewrote `forge-guard` around an explicit memory-resolution model: `active`,
+  `done`, `paused`, `blocked`, `initial`, `no-memory`, and `invalid`. Memory
+  faults now fail closed and name the next command; malformed hook input still
+  fails open.
+
+### Fixed
+- Stopped the guard from borrowing another checkout's Mission across a worktree,
+  nested-repository, or submodule boundary.
+- Stopped the guard from silently allowing edits when the active Mission cannot
+  be read; such checkouts are now refused and stay repairable under `.forge/`.
+
 ## [0.4.0] - 2026-10-29
 
 ### Added

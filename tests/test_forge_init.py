@@ -24,6 +24,11 @@ END_MARKER = "<!-- END FORGE MEMORY-FIRST -->"
 ACTIVATION_NOTICE = (
     "forge-init NEXT: activate the placeholder Mission before substantive work"
 )
+IGNORE_NOTICES = (
+    "forge-init ignore rule added: `.forge/MISSION.md` stays local to this checkout\n"
+    "forge-init NEXT: if `.forge/MISSION.md` is already tracked, run: "
+    "git rm --cached .forge/MISSION.md\n"
+)
 
 
 class ForgeInitTests(unittest.TestCase):
@@ -77,8 +82,18 @@ class ForgeInitTests(unittest.TestCase):
 
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertEqual(
-            f"forge-init initialized {self.project}\n{ACTIVATION_NOTICE}\n",
+            (
+                f"forge-init initialized {self.project}\n"
+                f"{IGNORE_NOTICES}{ACTIVATION_NOTICE}\n"
+            ),
             result.stdout,
+        )
+        self.assertEqual(
+            (
+                "# Forge active Mission: one per checkout, never shared\n"
+                ".forge/MISSION.md\n"
+            ),
+            (self.project / ".gitignore").read_text(encoding="utf-8"),
         )
         self.assertEqual("", result.stderr)
         forge = self.project / ".forge"
@@ -114,6 +129,20 @@ class ForgeInitTests(unittest.TestCase):
             self.assertIn("accepted visible delivery", text.lower())
             self.assertIn("forge-memory-validate", text)
             self.assertIn("do not checkpoint reads, edits, tests, or narration", text.lower())
+            self.assertIn("### One active Mission per checkout", text)
+            self.assertIn("### Design workflow collaboration", text)
+            for number in range(1, 11):
+                self.assertIn(f"- M{number} ", text)
+            self.assertIn("never commit it", text)
+            self.assertIn("Run `forge-init` in a new checkout or worktree", text)
+            self.assertIn("before removing its worktree", text)
+            self.assertIn("get user approval before building", text)
+            self.assertIn("not project records", text)
+            self.assertIn("before starting a plan", text)
+            self.assertIn("maps to one Success Criterion", text)
+            self.assertIn("locally_verified", text)
+            self.assertIn("starts only when the user asks", text)
+            self.assertIn("without explicit authorization", text)
             for legacy in ("thin protocol", "preflight", "reviewer", "gate"):
                 self.assertNotIn(legacy, text.lower())
 
@@ -218,6 +247,21 @@ class ForgeInitTests(unittest.TestCase):
                 self.assertFalse((forge / "archive").exists())
                 for path, content in bridges.items():
                     self.assertEqual(content, path.read_bytes())
+
+    def test_ignore_rule_is_appended_once_and_preserves_existing_entries(self):
+        ignore = self.project / ".gitignore"
+        ignore.write_text("node_modules/", encoding="utf-8")
+
+        first = self.run_init(str(self.project))
+        second = self.run_init(str(self.project))
+
+        self.assertEqual(0, first.returncode, first.stderr)
+        self.assertEqual(0, second.returncode, second.stderr)
+        self.assertIn(IGNORE_NOTICES, first.stdout)
+        self.assertNotIn("ignore rule added", second.stdout)
+        written = ignore.read_text(encoding="utf-8")
+        self.assertTrue(written.startswith("node_modules/\n"))
+        self.assertEqual(1, written.count(".forge/MISSION.md"))
 
     def test_appending_bridge_preserves_existing_file_bytes(self):
         existing = b"first\r\nsecond\r\n"

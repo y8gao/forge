@@ -162,11 +162,17 @@ class ForgeGuardTests(unittest.TestCase):
 
         self.assert_allowed(self.run_guard(file_path=str(plain / "app.py")))
 
-    def test_malformed_mission_fails_open(self) -> None:
+    def test_malformed_mission_fails_closed_but_stays_repairable(self) -> None:
         (self.forge / "MISSION.md").write_text("not a mission\n", encoding="utf-8")
 
+        self.assert_blocked(
+            self.run_guard(file_path=str(self.project / "src/app.py")),
+            "cannot be read",
+            "forge-memory-validate",
+            "repair `.forge/MISSION.md`",
+        )
         self.assert_allowed(
-            self.run_guard(file_path=str(self.project / "src/app.py"))
+            self.run_guard(file_path=str(self.forge / "MISSION.md"))
         )
 
     def test_edit_outside_the_project_is_allowed(self) -> None:
@@ -215,6 +221,71 @@ class ForgeGuardTests(unittest.TestCase):
     def test_plugin_manifest_declares_the_hook_file(self) -> None:
         manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
         self.assertEqual("./hooks/hooks.json", manifest["hooks"])
+
+
+    def make_worktree(
+        self, name: str, *, mission: str | None, intent: bool = True
+    ) -> Path:
+        worktree = self.root / name
+        worktree.mkdir()
+        (worktree / ".git").write_text("gitdir: /elsewhere\n", encoding="utf-8")
+        forge = worktree / ".forge"
+        forge.mkdir()
+        if intent:
+            (forge / "INTENT.md").write_text("intent\n", encoding="utf-8")
+        if mission is not None:
+            (forge / "MISSION.md").write_text(mission, encoding="utf-8")
+        (worktree / "src").mkdir()
+        return worktree
+
+    def test_checkout_boundary_without_mission_is_refused_not_borrowed(self) -> None:
+        self.write_mission(state="ready")
+        worktree = self.make_worktree("wt", mission=None)
+
+        self.assert_blocked(
+            self.run_guard(file_path=str(worktree / "src/app.py")),
+            "without an active Mission",
+            "forge-init",
+        )
+
+    def test_worktree_uses_its_own_mission_not_the_parent(self) -> None:
+        self.write_mission(state="ready")
+        worktree = self.make_worktree(
+            "wt", mission=render_mission("local-mission", state="done")
+        )
+
+        self.assert_blocked(
+            self.run_guard(file_path=str(worktree / "src/app.py")),
+            'state is "done"',
+            "local-mission",
+        )
+
+    def test_worktree_own_ready_mission_permits_work(self) -> None:
+        self.write_mission(state="done")
+        worktree = self.make_worktree(
+            "wt", mission=render_mission("local-mission", state="ready")
+        )
+
+        self.assert_allowed(
+            self.run_guard(file_path=str(worktree / "src/app.py"))
+        )
+
+    def test_missing_mission_stays_repairable_inside_forge(self) -> None:
+        worktree = self.make_worktree("wt", mission=None)
+
+        self.assert_allowed(
+            self.run_guard(file_path=str(worktree / ".forge/MISSION.md"))
+        )
+
+    def test_nested_checkout_without_memory_ends_the_search(self) -> None:
+        self.write_mission(state="done")
+        nested = self.project / "vendor"
+        (nested / ".git").mkdir(parents=True)
+        (nested / "src").mkdir()
+
+        self.assert_allowed(
+            self.run_guard(file_path=str(nested / "src/app.py"))
+        )
 
 
 if __name__ == "__main__":

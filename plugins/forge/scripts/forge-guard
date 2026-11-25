@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Claude Code PreToolUse guard for Forge active memory."""
+"""Claude Code PreToolUse guard for Forge active memory.
+
+Resolves this checkout's active memory, then refuses substantive edits unless it
+permits work. Memory faults fail closed; mechanism faults fail open.
+"""
 
 from __future__ import annotations
 
@@ -12,10 +16,33 @@ sys.dont_write_bytecode = True
 LIB = Path(__file__).resolve().parents[1] / "lib"
 sys.path.insert(0, str(LIB))
 
-from forge_memory import MemoryValidationError, load_mission
+from forge_memory import MemoryValidationError, load_mission  # noqa: E402
 
 
-BLOCKED_STATES = {
+BLOCKED_STATES = ("done", "paused", "blocked")
+
+NOT_FORGE = "not-forge"
+NO_MEMORY = "no-memory"
+INVALID = "invalid"
+INITIAL = "initial"
+ACTIVE = "active"
+
+NEXT_STEP = {
+    NO_MEMORY: (
+        "This checkout is a Forge project without an active Mission. Run "
+        "`forge-init` for this checkout, then publish the first Mission with "
+        "`forge-compact --replace-from`."
+    ),
+    INVALID: (
+        "This checkout's active control memory cannot be read. Run "
+        "`forge-memory-validate` to see the exact error, repair "
+        "`.forge/MISSION.md`, or replace it through `forge-compact "
+        "--replace-from` after the user confirms the next Mission."
+    ),
+    INITIAL: (
+        'MISSION has `mission_id: "initial"`. Activate a real `ready` Mission '
+        "with `forge-compact --replace-from` before editing project files."
+    ),
     "done": (
         "`done` is closed. Ask the user to confirm the next Mission, publish it "
         "as `ready` with `forge-compact --replace-from`, then retry."
@@ -37,18 +64,6 @@ def _target_path(payload: dict[str, object], cwd: Path) -> Path | None:
     return None
 
 
-def _project_root(target: Path | None, cwd: Path) -> Path | None:
-    start = target.parent if target is not None else cwd
-    try:
-        start = start.resolve()
-    except OSError:
-        return None
-    for directory in (start, *start.parents):
-        if (directory / ".forge" / "MISSION.md").is_file():
-            return directory
-    return None
-
-
 def _inside_forge(project_root: Path, target: Path | None) -> bool:
     if target is None:
         return False
@@ -59,19 +74,42 @@ def _inside_forge(project_root: Path, target: Path | None) -> bool:
     return True
 
 
-def _refusal(mission) -> str | None:
-    if mission.mission_id == "initial":
-        return (
-            'MISSION has `mission_id: "initial"`. Activate a real `ready` Mission '
-            "with `forge-compact --replace-from` before editing project files."
-        )
-    action = BLOCKED_STATES.get(mission.state)
-    if action is None:
-        return None
-    return (
-        f'MISSION state is "{mission.state}" (mission: {mission.mission_id}). '
-        f"{action}"
-    )
+def _active_status(mission: Path) -> tuple[str, str | None]:
+    try:
+        memory = load_mission(mission)
+    except (MemoryValidationError, OSError, UnicodeError):
+        return INVALID, None
+    if memory.mission_id == "initial":
+        return INITIAL, memory.mission_id
+    if memory.state in BLOCKED_STATES:
+        return memory.state, memory.mission_id
+    return ACTIVE, memory.mission_id
+
+
+def _resolve_memory(
+    target: Path | None, cwd: Path
+) -> tuple[Path | None, str, str | None]:
+    """Resolve the active memory that governs `target`.
+
+    Activity memory belongs to one checkout and never crosses a checkout
+    boundary: `.git` is a directory in a main checkout, a file in a linked
+    worktree or submodule, and either one ends the search.
+    """
+    start = target.parent if target is not None else cwd
+    try:
+        start = start.resolve()
+    except OSError:
+        return None, NOT_FORGE, None
+    for directory in (start, *start.parents):
+        mission = directory / ".forge" / "MISSION.md"
+        if mission.is_file():
+            status, mission_id = _active_status(mission)
+            return directory, status, mission_id
+        if (directory / ".git").exists():
+            if (directory / ".forge" / "INTENT.md").is_file():
+                return directory, NO_MEMORY, None
+            return None, NOT_FORGE, None
+    return None, NOT_FORGE, None
 
 
 def main() -> int:
@@ -88,23 +126,19 @@ def main() -> int:
     cwd = Path(raw_cwd)
 
     target = _target_path(payload, cwd)
-    project_root = _project_root(target, cwd)
-    if project_root is None or _inside_forge(project_root, target):
+    project_root, status, mission_id = _resolve_memory(target, cwd)
+    if project_root is None or status == ACTIVE:
+        return 0
+    if _inside_forge(project_root, target):
         return 0
 
-    try:
-        mission = load_mission(project_root / ".forge" / "MISSION.md")
-    except (MemoryValidationError, OSError, UnicodeError):
-        return 0
-
-    refusal = _refusal(mission)
-    if refusal is None:
-        return 0
-
+    detail = NEXT_STEP[status]
+    if status in BLOCKED_STATES:
+        detail = f'MISSION state is "{status}" (mission: {mission_id}). {detail}'
     tool_name = payload.get("tool_name", "edit")
     print(
         f"forge-guard: blocked {tool_name} on {target or project_root}.\n"
-        f"{refusal}\n"
+        f"{detail}\n"
         "Edits under `.forge/` are exempt so the Mission can be repaired.",
         file=sys.stderr,
     )
