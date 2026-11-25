@@ -21,13 +21,13 @@ checkpointed_at: "2026-11-25T03:00:00Z"
 - [x] `forge-init` 自动写入并保持 `.forge/MISSION.md` 的忽略规则（幂等；符号链接只告警不中断）。
 - [x] 三份 host 拷贝与 portable 副本同步且内容校验通过。
 - [x] forge 侧 `validate-content`、`forge-memory-validate` 与全量测试全绿。
-- [ ] tsn-scheduler 执行 `git rm --cached .forge/MISSION.md` + `forge-init` 后回归全绿（待用户执行 git）。
+- [ ] tsn-scheduler 的 `.gitignore` / bridge 变更提交后回归全绿（提交归用户）。
 
 ## Latest Delivery
-- 2026-11-25：guard 重写为六态解析模型（active / done / paused / blocked / initial / no-memory / invalid），记忆故障 fail closed、机制故障 fail open，checkout 边界统一覆盖链接工作树、嵌套 repo 与 submodule；`forge-init` 的 bridge 扩为 24 行政策（Memory-First + M1–M10）；`forge-init` 自动维护 `.gitignore` 忽略规则；测试增至 guard 18 例、init 14 例；设计文档 491 行（新增 §15 撰写规范、§16 复盘）。未提交（两侧 AGENTS.md 均要求授权）。
+- 2026-11-25（v0.5.0 已发布）：`forge-guard` 改为六态解析模型（记忆故障 fail closed、机制故障 fail open、checkout 边界统一覆盖链接工作树/嵌套 repo/submodule）；`forge-init` 的 bridge 扩为 24 行政策（M1–M10）并自动维护 `.gitignore` 忽略规则；三份 portable 拷贝同步；测试 guard 18 例 + init 14 例。发版：功能提交 `8ebe9f9`、六文件发版提交 `66ff830`、tag `v0.5.0` 已推、GitHub Release 已发布、已安装插件 0.4.0 → 0.5.0（guard/init 与仓库逐字节相同，并用worktree 无任务 / tsn-scheduler done / 本仓 working 三个探针验证过行为）。
 
 ## Next Action
-- 用户在 tsn-scheduler 执行 `git rm --cached .forge/MISSION.md`，再跑 `forge-init .`；随后两侧各跑一遍全量测试；提交需用户明确授权。
+- 重启 Claude Code 让 0.5.0 的 hook 生效；随后在 tsn-scheduler 审查并提交已暂存的 `git rm --cached` + `.gitignore` + 两个 bridge（提交需用户授权）；再两侧各跑一遍全量测试。
 
 ## Blockers
 - None.
